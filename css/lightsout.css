@@ -23,23 +23,147 @@ html, body {
   text-align: center;
 }
 
+#moves {
+  font-family: monospace;
+  font-size: 10px;
+}
+
+#game-number {
+  height: 44px;
+}
+
+#game-number:before {
+  content: '#';
+}
+
 table#puzzle {
   border-collapse: collapse;
   margin: 10px auto;
 }
 
-table#puzzle td {
-  width: 44px;
-  height: 44px;
-  text-align: center;
-  vertical-align: middle;
-  border: 1px solid #f0f0f0;
-  cursor: pointer;
-  padding: 0;
+  table#puzzle td {
+    width: 44px;
+    height: 44px;
+    text-align: center;
+    cursor: pointer;
+    padding: 0;
+    -webkit-transform-style: preserve-3d;
+    transform-style: preserve-3d;
+    -moz-perspective: 88px;
+    -ms-perspective: 88px;
+    -webkit-perspective: 88px;
+    perspective: 88px;
+    -moz-perspective-origin: center center;
+    -ms-perspective-origin: center center;
+    -webkit-perspective-origin: center center;
+    perspective-origin: center center;
+    -moz-transform-origin: center center;
+    -ms-transform-origin: center center;
+    -o-transform-origin: center center;
+    -webkit-transform-origin: center center;
+    transform-origin: center center;
+    position: relative;
+  }
+
+  table#puzzle .hint {
+    background-color: rgb(70, 85, 91);
+  }
+
+  table#puzzle td span.three-d {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    -moz-backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    border: 1px solid #f0f0f0;
+  }
+
+  table#puzzle td .three-d.front {
+    -moz-animation: spin-to-back ease-in-out 0.5s;
+    -o-animation: spin-to-back ease-in-out 0.5s;
+    -webkit-animation: spin-to-back ease-in-out 0.5s;
+    animation: spin-to-back ease-in-out 0.5s;
+    -moz-transform: rotateY(0deg);
+    -ms-transform: rotateY(0deg);
+    -o-transform: rotateY(0deg);
+    -webkit-transform: rotateY(0deg);
+    transform: rotateY(0deg);
+  }
+
+  table#puzzle td .three-d.back {
+    -moz-animation: spin-to-front ease-in-out 0.5s;
+    -o-animation: spin-to-front ease-in-out 0.5s;
+    -webkit-animation: spin-to-front ease-in-out 0.5s;
+    animation: spin-to-front ease-in-out 0.5s;
+    -moz-transform: rotateY(180deg);
+    -ms-transform: rotateY(180deg);
+    -o-transform: rotateY(180deg);
+    -webkit-transform: rotateY(180deg);
+    transform: rotateY(180deg);
+  }
+
+@-moz-keyframes spin-to-front {
+  from {
+    -moz-transform: rotateY(0deg);
+  }
+
+  to {
+    -moz-transform: rotateY(180deg);
+  }
 }
 
-table#puzzle td.hint {
-  background-color: rgb(70, 85, 91);
+@-webkit-keyframes spin-to-front {
+  from {
+    -webkit-transform: rotateY(0deg);
+  }
+
+  to {
+    -webkit-transform: rotateY(180deg);
+  }
+}
+
+@keyframes spin-to-front {
+  from {
+    transform: rotateY(0deg);
+  }
+
+  to {
+    transform: rotateY(180deg);
+  }
+}
+
+@-moz-keyframes spin-to-back {
+  from {
+    -moz-transform: rotateY(180deg);
+  }
+
+  to {
+    -moz-transform: rotateY(360deg);
+  }
+}
+
+@-webkit-keyframes spin-to-back {
+  from {
+    -webkit-transform: rotateY(180deg);
+  }
+
+  to {
+    -webkit-transform: rotateY(360deg);
+  }
+}
+
+@keyframes spin-to-back {
+  from {
+    transform: rotateY(180deg);
+  }
+
+  to {
+    transform: rotateY(360deg);
+  }
 }
 
 button {
@@ -53,14 +177,14 @@ button {
   min-width: 44px;
 }
 
-button:hover {
-  background-color: #cfd9de;
-}
+  button:hover {
+    background-color: #cfd9de;
+  }
 
-button:active {
-  background-color: #e4e9eb;
-}
+  button:active {
+    background-color: #e4e9eb;
+  }
 
-button:disabled {
-  cursor: not-allowed;
-}
+  button:disabled {
+    cursor: not-allowed;
+  }

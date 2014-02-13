@@ -17,12 +17,15 @@
 */
 
 var RNG = function (seed) {
-  this.seed(seed);
+  this.seed(seed || Date.now());
 };
-RNG.prototype.seed = function(seed) {
+RNG.prototype.seed = function (seed) {
+  if (typeof seed !== 'number')
+    throw new TypeError('Parameter `seed` must be a number');
   this.X = seed;
 };
 RNG.prototype.next = function () {
+  // LCG (from the book 'Numerical Recipes')
   this.X = (1664525 * this.X + 1013904223) % 4294967296;
   return this.X;
 };
@@ -43,7 +46,15 @@ var CTLIGHTSOUT = (function () {
     N = 4, M = 5,
     nFields = N * M,
     nTurns = nFields / 2,
-    nCombinations = nFields.factorial() / (nTurns.factorial() * (nFields - nTurns).factorial());
+    nCombinations = nFields.factorial() / (nTurns.factorial() * (nFields - nTurns).factorial()),
+    gameNum;
+
+
+  function flip(x, y) {
+    puzzle[x][y] ^= 0x1;
+    $('#new-' + x + '-' + y).toggleClass('front').toggleClass('back');
+    $('#old-' + x + '-' + y).toggleClass('front').toggleClass('back');
+  }
 
 
   function turn(x, y) {
@@ -51,15 +62,15 @@ var CTLIGHTSOUT = (function () {
       below = y + 1,
       left = x - 1,
       right = x + 1;
-    puzzle[x][y] ^= 0x1;
+    flip(x, y);
     if (above >= 0)
-      puzzle[x][above] ^= 0x1;
+      flip(x, above);
     if (below < M)
-      puzzle[x][below] ^= 0x1;
+      flip(x, below);
     if (left >= 0)
-      puzzle[left][y] ^= 0x1;
+      flip(left, y);
     if (right < N)
-      puzzle[right][y] ^= 0x1;
+      flip(right, y);
   }
 
 
@@ -73,21 +84,29 @@ var CTLIGHTSOUT = (function () {
 
 
   function drawPuzzle() {
-    var x, y, p = $('#puzzle'), tr, td;
+    var x, y, p = $('#puzzle'), tr, td, fOld, fNew;
     p.empty();
     for (y = 0; y < M; ++y) {
       tr = $('<tr></tr>');
       for (x = 0; x < N; ++x) {
-        td = $('<td></td>')
-          .attr('id', x + '-' + y)
+        fOld = $('<span></span>')
+          .text(puzzle[x][y] ^ 1)
+          .attr('id', 'old-' + x + '-' + y)
+          .addClass('three-d back')
+        fNew = $('<span></span>')
           .text(puzzle[x][y])
+          .attr('id', 'new-' + x + '-' + y)
+          .addClass('three-d front')
+        td = $('<td></td>')
           .click(function (x, y) {
-            moves.push({ x: x, y: y });
             turn(x, y);
-            drawPuzzle();
+            moves.push({ x: x, y: y });
+            $('#moves').append('[' + x + ',' + y + '] ');
             $('button#hint').prop('disabled', true);
-            console.log(checkFinished());
-          }.bind(null, x, y));
+            checkFinished();
+          }.bind(null, x, y))
+          .append(fOld)
+          .append(fNew);
         tr.append(td);
       }
       p.append(tr);
@@ -124,16 +143,18 @@ var CTLIGHTSOUT = (function () {
 
 
   function initPuzzle() {
-    var f, x, y, i, no = Math.floor(Math.random() * nCombinations);
+    var f, x, y, i, selected;
+
     clearPuzzle();
-    rng.seed(0);
-    rng.seed(no);
-    $('#game-number').text('#' + no);
+    rng.seed(gameNum);
+    $('#game-number').text(gameNum);
+    selected = [];
     solution = [];
     i = nTurns;
     while (i > 0) {
       f = rng.next() % nFields;
-      if (solution.indexOf(f) < 0) {
+      if (selected.indexOf(f) < 0) {
+        selected.push(f);
         x = f % N;
         y = Math.floor(f / N);
         turn(x, y);
@@ -147,6 +168,7 @@ var CTLIGHTSOUT = (function () {
 
   function restart() {
     moves = [];
+    $('#moves').empty();
     initPuzzle();
     $('button#hint')
       .prop('disabled', false)
@@ -154,7 +176,8 @@ var CTLIGHTSOUT = (function () {
         var i, f;
         for (i = 0; i < solution.length; ++i) {
           f = solution[i];
-          $('#' + f.x + '-' + f.y).addClass('hint');
+          $('#old-' + f.x + '-' + f.y).addClass('hint');
+          $('#new-' + f.x + '-' + f.y).addClass('hint');
         }
       });
   }
@@ -162,7 +185,12 @@ var CTLIGHTSOUT = (function () {
 
   return {
     init: function () {
-      $('button#new-game').click(restart);
+      $('button#new-game').click(function () {
+        gameNum = Math.floor(Math.random() * nCombinations);
+        document.location.hash = '#' + gameNum;
+        restart();
+      });
+      gameNum = (document.location.hash) ? parseInt(document.location.hash.substring(1), 10) : Math.floor(Math.random() * nCombinations);
       restart();
     }
   };
