@@ -1,4 +1,4 @@
-﻿/*
+/*
     c't Lights Out Puzzle
     Copyright (c) 2014 Oliver Lau <ola@ct.de>, Heise Zeitschriften Verlag
 
@@ -168,6 +168,12 @@ var CTLIGHTSOUT = (function () {
   }
 
 
+  function setGameNum(num) {
+    gameNum = num;
+    document.location.hash = '#' + gameNum;
+  }
+
+
   function restart() {
     moves = [];
     $('#moves').empty();
@@ -178,8 +184,8 @@ var CTLIGHTSOUT = (function () {
         var i, f;
         for (i = 0; i < solution.length; ++i) {
           f = solution[i];
-          $('#old-' + f.x + '-' + f.y).addClass('hint');
-          $('#new-' + f.x + '-' + f.y).addClass('hint');
+          $('#back-' + f.x + '-' + f.y).addClass('hint');
+          $('#front-' + f.x + '-' + f.y).addClass('hint');
         }
       });
   }
@@ -188,11 +194,10 @@ var CTLIGHTSOUT = (function () {
   return {
     init: function () {
       $('button#new-game').click(function () {
-        gameNum = Math.floor(Math.random() * nCombinations);
-        document.location.hash = '#' + gameNum;
+        setGameNum(Math.floor(Math.random() * nCombinations));
         restart();
       });
-      gameNum = (document.location.hash) ? parseInt(document.location.hash.substring(1), 10) : Math.floor(Math.random() * nCombinations);
+      setGameNum((document.location.hash) ? parseInt(document.location.hash.substring(1), 10) : Math.floor(Math.random() * nCombinations));
       restart();
     }
   };
