@@ -79,14 +79,22 @@ table#puzzle {
     -moz-backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
-    border: 1px solid #f0f0f0;
+    border: 1px solid #111;
+  }
+
+  table#puzzle td .three-d.old {
+    background-color: #ce681f;
+  }
+
+  table#puzzle td .three-d.new {
+    background-color: #35bb2b;
   }
 
   table#puzzle td .three-d.front {
-    -moz-animation: spin-to-back ease-in-out 0.5s;
-    -o-animation: spin-to-back ease-in-out 0.5s;
-    -webkit-animation: spin-to-back ease-in-out 0.5s;
-    animation: spin-to-back ease-in-out 0.5s;
+    -moz-animation: spin-to-back ease-in-out 0.5s forwards;
+    -o-animation: spin-to-back ease-in-out 0.5s forwards;
+    -webkit-animation: spin-to-back ease-in-out 0.5s forwards;
+    animation: spin-to-back ease-in-out 0.5s forwards;
     -moz-transform: rotateY(0deg);
     -ms-transform: rotateY(0deg);
     -o-transform: rotateY(0deg);
@@ -95,10 +103,10 @@ table#puzzle {
   }
 
   table#puzzle td .three-d.back {
-    -moz-animation: spin-to-front ease-in-out 0.5s;
-    -o-animation: spin-to-front ease-in-out 0.5s;
-    -webkit-animation: spin-to-front ease-in-out 0.5s;
-    animation: spin-to-front ease-in-out 0.5s;
+    -moz-animation: spin-to-front ease-in-out 0.5s forwards;
+    -o-animation: spin-to-front ease-in-out 0.5s forwards;
+    -webkit-animation: spin-to-front ease-in-out 0.5s forwards;
+    animation: spin-to-front ease-in-out 0.5s forwards;
     -moz-transform: rotateY(180deg);
     -ms-transform: rotateY(180deg);
     -o-transform: rotateY(180deg);

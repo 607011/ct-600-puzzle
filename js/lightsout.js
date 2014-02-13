@@ -52,8 +52,8 @@ var CTLIGHTSOUT = (function () {
 
   function flip(x, y) {
     puzzle[x][y] ^= 0x1;
-    $('#new-' + x + '-' + y).toggleClass('front').toggleClass('back');
-    $('#old-' + x + '-' + y).toggleClass('front').toggleClass('back');
+    $('#back-' + x + '-' + y).toggleClass('front').toggleClass('back');
+    $('#front-' + x + '-' + y).toggleClass('front').toggleClass('back');
   }
 
 
@@ -90,13 +90,15 @@ var CTLIGHTSOUT = (function () {
       tr = $('<tr></tr>');
       for (x = 0; x < N; ++x) {
         fOld = $('<span></span>')
-          .text(puzzle[x][y] ^ 1)
-          .attr('id', 'old-' + x + '-' + y)
+          //.text(puzzle[x][y] ^ 1)
+          .attr('id', 'back-' + x + '-' + y)
           .addClass('three-d back')
+          .addClass(puzzle[x][y] === 0 ? 'old' : 'new');
         fNew = $('<span></span>')
-          .text(puzzle[x][y])
-          .attr('id', 'new-' + x + '-' + y)
+          //.text(puzzle[x][y])
+          .attr('id', 'front-' + x + '-' + y)
           .addClass('three-d front')
+          .addClass(puzzle[x][y] === 1 ? 'old' : 'new');
         td = $('<td></td>')
           .click(function (x, y) {
             turn(x, y);
