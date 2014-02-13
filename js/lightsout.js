@@ -39,7 +39,7 @@ var CTLIGHTSOUT = (function () {
   "use strict";
 
   var rng = new RNG(),
-    puzzle, moves, solution, solutionXY,
+    puzzle, moves, solution,
     N = 4, M = 5,
     nFields = N * M,
     nTurns = nFields / 2,
@@ -64,10 +64,10 @@ var CTLIGHTSOUT = (function () {
 
 
   function solvePuzzle() {
-    var i, xy;
-    for (i = 0; i < solutionXY.length; ++i) {
-      xy = solutionXY[i];
-      turn(xy[0], xy[1]);
+    var i, f;
+    for (i = 0; i < solution.length; ++i) {
+      f = solution[i];
+      turn(f.x, f.y);
     }
   }
 
@@ -82,9 +82,11 @@ var CTLIGHTSOUT = (function () {
           .attr('id', x + '-' + y)
           .text(puzzle[x][y])
           .click(function (x, y) {
-            console.log(x, y);
+            moves.push({ x: x, y: y });
             turn(x, y);
             drawPuzzle();
+            $('button#hint').prop('disabled', true);
+            console.log(checkFinished());
           }.bind(null, x, y));
         tr.append(td);
       }
@@ -104,28 +106,40 @@ var CTLIGHTSOUT = (function () {
   }
 
 
+  function checkFinished() {
+    var fields = puzzle.reduce(
+      function (prev, current) {
+        return prev.concat(current);
+      }),
+      finished = fields.every(function (ele) {
+        return ele === 1;
+      }) || fields.every(function (ele) {
+        return ele === 0;
+      });
+    if (finished) {
+      alert('Juhuuu! Du hast das Puzzle mit ' + moves.length + ' Zügen gelöst!');
+      restart();
+    }
+  }
+
+
   function initPuzzle() {
-    var f, x, y, i;
+    var f, x, y, i, no = Math.floor(Math.random() * nCombinations);
     clearPuzzle();
     rng.seed(0);
-    rng.seed(Math.floor(Math.random() * nCombinations));
+    rng.seed(no);
+    $('#game-number').text('#' + no);
     solution = [];
     i = nTurns;
     while (i > 0) {
       f = rng.next() % nFields;
       if (solution.indexOf(f) < 0) {
-        solution.push(f);
+        x = f % N;
+        y = Math.floor(f / N);
+        turn(x, y);
+        solution.push({ x: x, y: y });
         --i;
       }
-    }
-    solution = solution.sort(function (a, b) { return a - b; });
-    solutionXY = [];
-    for (i = 0; i < solution.length; ++i) {
-      f = solution[i];
-      x = f % N;
-      y = Math.floor(f / N);
-      turn(x, y);
-      solutionXY.push([x, y]);
     }
     drawPuzzle();
   }
@@ -134,21 +148,21 @@ var CTLIGHTSOUT = (function () {
   function restart() {
     moves = [];
     initPuzzle();
+    $('button#hint')
+      .prop('disabled', false)
+      .click(function () {
+        var i, f;
+        for (i = 0; i < solution.length; ++i) {
+          f = solution[i];
+          $('#' + f.x + '-' + f.y).addClass('hint');
+        }
+      });
   }
+
 
   return {
     init: function () {
-      $('button#solve').click(function () {
-        solvePuzzle();
-        drawPuzzle();
-      });
-      $('button#hint').click(function () {
-        var i, xy;
-        for (i = 0; i < solutionXY.length; ++i) {
-          xy = solutionXY[i];
-          $('#' + xy[0] + '-' + xy[1]).addClass('hint');
-        }
-      });
+      $('button#new-game').click(restart);
       restart();
     }
   };
