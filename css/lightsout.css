@@ -1,0 +1,55 @@
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Regular'), local('Roboto-Regular'), url(http://themes.googleusercontent.com/static/fonts/roboto/v10/2UX7WLTfW3W8TclTUvlFyQ.woff) format('woff');
+}
+
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: Roboto, -apple-system-font, Helvetica, Arial, Verdana, sans-serif;
+  font-size: 17px;
+  background-color: rgba(56,63,66,1);
+  color: #f0f0f0;
+}
+
+table#puzzle {
+  border-collapse: collapse;
+}
+
+table#puzzle td {
+  width: 32px;
+  height: 32px;
+  text-align: center;
+  vertical-align: middle;
+  border: 1px solid #f0f0f0;
+  cursor: pointer;
+}
+
+table#puzzle td.hint {
+  background-color: rgb(70, 85, 91);
+}
+
+button {
+  border: 1px solid #1b1d1e;
+  cursor: pointer;
+  padding: 1ex 0.5em;
+  font-family: Roboto, -apple-system-font, Helvetica, Arial, Verdana, sans-serif;
+  font-size: 14px;
+  background-color: #bfd2db;
+  height: 44px;
+}
+
+button:hover {
+  background-color: #cfd9de;
+}
+
+button:active {
+  background-color: #e4e9eb;
+}
