@@ -249,3 +249,33 @@ select {
   display: inline-block;
   background-color: #bfd2db;
 }
+
+body.readme {
+  margin: 0 auto;
+  padding: 0.5ex 0.5em;
+}
+
+p {
+  margin: 1ex 0;
+}
+
+footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  padding: 0.5ex 1em;
+  font-size: smaller;
+}
+
+a {
+  color: #f8f8f8;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+  a:hover {
+    text-decoration: underline;
+  }
+

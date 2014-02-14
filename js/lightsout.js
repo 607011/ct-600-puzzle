@@ -114,6 +114,7 @@ var CTLIGHTSOUT = (function () {
             moves.push({ x: x, y: y });
             $('#moves').append('[' + x + ',' + y + '] ');
             $('button#hint').prop('disabled', true);
+            $('button#again').prop('disabled', false);
             setTimeout(checkFinished, 100);
           }.bind(null, x, y))
           .append(fOld)
@@ -166,7 +167,7 @@ var CTLIGHTSOUT = (function () {
     nFields = N * M;
     nTurns = nFields / 2;
     nCombinations = nFields.factorial() / (nTurns.factorial() * (nFields - nTurns).factorial());
-    opts.game = Math.max(0, Math.min(typeof num === 'number' ? num : Math.floor(Math.random() * nCombinations), 4294967296));
+    opts.game = Math.max(0, Math.min(typeof num === 'number' ? num : Math.floor(Math.random() * nCombinations % 4294967296), 4294967296));
     document.location.hash = $.map(opts, function (value, key) { return key + '=' + value; }).join(';');
     moves = [];
     $('#moves').empty();
@@ -184,6 +185,12 @@ var CTLIGHTSOUT = (function () {
   }
 
 
+  function restart() {
+    if (confirm('Dieses Puzzle wirklich von vorne beginnen?'))
+      newGame(opts.difficulty, opts.game);
+  }
+
+
   return {
     init: function () {
       var p;
@@ -194,6 +201,7 @@ var CTLIGHTSOUT = (function () {
           opts[p[0]] = parseInt(p[1], 10);
         });
       }
+      $('button#again').click(restart).prop('disabled', true);
       $('button#new-game').click(function () { newGame(parseInt($('#d-container').val(), 10)) });
       newGame(
         typeof opts.difficulty === 'number' ? Math.min(Math.max(opts.difficulty, 0), difficulties.length - 1) : 1,
