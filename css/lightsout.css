@@ -66,10 +66,10 @@ table#puzzle {
   }
 
   table#puzzle .hint {
-    border-color: white !important;
+    opacity: 0.84;
   }
 
-  table#puzzle td span.three-d {
+  table#puzzle td > span.three-d {
     position: absolute;
     top: 0;
     left: 0;
@@ -117,29 +117,41 @@ table#puzzle {
 @-moz-keyframes spin-to-front {
   from {
     -moz-transform: rotateY(0deg);
+    transform: rotateY(0deg);
   }
 
   to {
     -moz-transform: rotateY(180deg);
+    transform: rotateY(180deg);
   }
 }
 
 @-webkit-keyframes spin-to-front {
   from {
     -webkit-transform: rotateY(0deg);
+    transform: rotateY(0deg);
   }
 
   to {
     -webkit-transform: rotateY(180deg);
+    transform: rotateY(180deg);
   }
 }
 
 @keyframes spin-to-front {
   from {
+    -moz-transform: rotateY(0deg);
+    -ms-transform: rotateY(0deg);
+    -o-transform: rotateY(0deg);
+    -webkit-transform: rotateY(0deg);
     transform: rotateY(0deg);
   }
 
   to {
+    -moz-transform: rotateY(180deg);
+    -ms-transform: rotateY(180deg);
+    -o-transform: rotateY(180deg);
+    -webkit-transform: rotateY(180deg);
     transform: rotateY(180deg);
   }
 }
@@ -147,29 +159,41 @@ table#puzzle {
 @-moz-keyframes spin-to-back {
   from {
     -moz-transform: rotateY(180deg);
+    transform: rotateY(180deg);
   }
 
   to {
     -moz-transform: rotateY(360deg);
+    transform: rotateY(360deg);
   }
 }
 
 @-webkit-keyframes spin-to-back {
   from {
     -webkit-transform: rotateY(180deg);
+    transform: rotateY(180deg);
   }
 
   to {
     -webkit-transform: rotateY(360deg);
+    transform: rotateY(360deg);
   }
 }
 
 @keyframes spin-to-back {
   from {
+    -moz-transform: rotateY(180deg);
+    -ms-transform: rotateY(180deg);
+    -o-transform: rotateY(180deg);
+    -webkit-transform: rotateY(180deg);
     transform: rotateY(180deg);
   }
 
   to {
+    -moz-transform: rotateY(360deg);
+    -ms-transform: rotateY(360deg);
+    -o-transform: rotateY(360deg);
+    -webkit-transform: rotateY(360deg);
     transform: rotateY(360deg);
   }
 }

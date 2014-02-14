@@ -25,7 +25,7 @@ RNG.prototype.seed = function (seed) {
   this.X = seed;
 };
 RNG.prototype.next = function () {
-  // LCG (from the book 'Numerical Recipes')
+  // LCG from the book 'Numerical Recipes'
   this.X = (1664525 * this.X + 1013904223) % 4294967296;
   return this.X;
 };
@@ -41,13 +41,14 @@ Number.prototype.factorial = function () {
 var CTLIGHTSOUT = (function () {
   "use strict";
 
-  var rng = new RNG(),
-    puzzle, moves, solution,
-    N = 4, M = 5,
-    nFields = N * M,
-    nTurns = nFields / 2,
-    nCombinations = nFields.factorial() / (nTurns.factorial() * (nFields - nTurns).factorial()),
-    gameNum;
+  var difficulties = {
+    'leicht': { n: 3, m: 4 },
+    'mittel': { n: 4, m: 5 },
+    'schwer': { n: 7, m: 10 }
+  },
+    rng = new RNG(),
+    puzzle, moves, solution, gameNum,
+    N, M, nFields, nTurns, nCombinations;
 
 
   function flip(x, y) {
@@ -74,15 +75,6 @@ var CTLIGHTSOUT = (function () {
   }
 
 
-  function solvePuzzle() {
-    var i, f;
-    for (i = 0; i < solution.length; ++i) {
-      f = solution[i];
-      turn(f.x, f.y);
-    }
-  }
-
-
   function drawPuzzle() {
     var x, y, p = $('#puzzle'), tr, td, fOld, fNew;
     p.empty();
@@ -90,12 +82,10 @@ var CTLIGHTSOUT = (function () {
       tr = $('<tr></tr>');
       for (x = 0; x < N; ++x) {
         fOld = $('<span></span>')
-          //.text(puzzle[x][y] ^ 1)
           .attr('id', 'back-' + x + '-' + y)
           .addClass('three-d back')
           .addClass(puzzle[x][y] === 0 ? 'old' : 'new');
         fNew = $('<span></span>')
-          //.text(puzzle[x][y])
           .attr('id', 'front-' + x + '-' + y)
           .addClass('three-d front')
           .addClass(puzzle[x][y] === 1 ? 'old' : 'new');
@@ -105,7 +95,7 @@ var CTLIGHTSOUT = (function () {
             moves.push({ x: x, y: y });
             $('#moves').append('[' + x + ',' + y + '] ');
             $('button#hint').prop('disabled', true);
-            checkFinished();
+            setTimeout(checkFinished, 100);
           }.bind(null, x, y))
           .append(fOld)
           .append(fNew);
@@ -139,14 +129,13 @@ var CTLIGHTSOUT = (function () {
       });
     if (finished) {
       alert('Juhuuu! Du hast das Puzzle mit ' + moves.length + ' Zügen gelöst!');
-      restart();
+      newGame();
     }
   }
 
 
   function initPuzzle() {
     var f, x, y, i, selected;
-
     clearPuzzle();
     rng.seed(gameNum);
     $('#game-number').text(gameNum);
@@ -168,13 +157,25 @@ var CTLIGHTSOUT = (function () {
   }
 
 
+  function setDifficulty(difficulty) {
+    difficulty = difficulty || 'mittel';
+    N = difficulties[difficulty].n;
+    M = difficulties[difficulty].m;
+    nFields = N * M;
+    nTurns = nFields / 2;
+    nCombinations = nFields.factorial() / (nTurns.factorial() * (nFields - nTurns).factorial());
+  }
+
+
   function setGameNum(num) {
-    gameNum = num;
+    gameNum = num || Math.floor(Math.random() * nCombinations);
     document.location.hash = '#' + gameNum;
   }
 
 
-  function restart() {
+  function newGame(num, difficulty) {
+    setDifficulty(difficulty);
+    setGameNum(num);
     moves = [];
     $('#moves').empty();
     initPuzzle();
@@ -193,12 +194,8 @@ var CTLIGHTSOUT = (function () {
 
   return {
     init: function () {
-      $('button#new-game').click(function () {
-        setGameNum(Math.floor(Math.random() * nCombinations));
-        restart();
-      });
-      setGameNum((document.location.hash) ? parseInt(document.location.hash.substring(1), 10) : Math.floor(Math.random() * nCombinations));
-      restart();
+      $('button#new-game').click(function () { newGame() });
+      newGame((document.location.hash.length > 1) ? parseInt(document.location.hash.substring(1), 10) : Math.floor(Math.random() * nCombinations));
     }
   };
 
