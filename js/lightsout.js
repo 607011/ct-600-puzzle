@@ -183,37 +183,53 @@ var CTLIGHTSOUT = (function () {
   }
 
 
+  function preloadImages(callback) {
+    var IMAGES = ['img/cover0.jpg', 'img/cover1.jpg'],
+      i, loaded = 0, N = IMAGES.length;
+    for (i = 0; i < N; ++i) {
+      var img = new Image();
+      img.onload = function() {
+        if (++loaded === N)
+          callback.call();
+      }
+      img.src = IMAGES[i];
+    }
+  }
+
+
   return {
     init: function () {
-      var p;
-      if (document.location.hash.length > 1) {
-        p = document.location.hash.substring(1).split(';');
-        $.each(p, function (i, d) {
-          var p = d.split('=');
-          opts[p[0]] = parseInt(p[1], 10);
-        });
-      }
-      $('button#hint').click(function () {
-        var i, f;
-        for (i = 0; i < solution.length; ++i) {
-          f = solution[i];
-          $('#back-' + f.x + '-' + f.y).toggleClass('hint');
-          $('#front-' + f.x + '-' + f.y).toggleClass('hint');
+      preloadImages(function () {
+        var p;
+        if (document.location.hash.length > 1) {
+          p = document.location.hash.substring(1).split(';');
+          $.each(p, function (i, d) {
+            var p = d.split('=');
+            opts[p[0]] = parseInt(p[1], 10);
+          });
         }
+        $('button#hint').click(function () {
+          var i, f;
+          for (i = 0; i < solution.length; ++i) {
+            f = solution[i];
+            $('#back-' + f.x + '-' + f.y).toggleClass('hint');
+            $('#front-' + f.x + '-' + f.y).toggleClass('hint');
+          }
+        });
+        $('button#again').click(restart).prop('disabled', true);
+        $('button#new-game').click(function () { newGame(parseInt($('#d-container').val(), 10)) });
+        newGame(
+          typeof opts.difficulty === 'number' ? Math.min(Math.max(opts.difficulty, 0), difficulties.length - 1) : 1,
+          typeof opts.game === 'number' ? opts.game : undefined
+        );
+        $.each(difficulties, function (i, d) {
+          $('#d-container').append($('<option></option>').attr('value', i).text(d.d));
+        });
+        $('#d-container').change(function () {
+          var difficulty = parseInt($('#d-container').val(), 10);
+          newGame(difficulty);
+        }).val(opts.difficulty);
       });
-      $('button#again').click(restart).prop('disabled', true);
-      $('button#new-game').click(function () { newGame(parseInt($('#d-container').val(), 10)) });
-      newGame(
-        typeof opts.difficulty === 'number' ? Math.min(Math.max(opts.difficulty, 0), difficulties.length - 1) : 1,
-        typeof opts.game === 'number' ? opts.game : undefined
-      );
-      $.each(difficulties, function (i, d) {
-        $('#d-container').append($('<option></option>').attr('value', i).text(d.d));
-      });
-      $('#d-container').change(function () {
-        var difficulty = parseInt($('#d-container').val(), 10);
-        newGame(difficulty);
-      }).val(opts.difficulty);
     }
   };
 
