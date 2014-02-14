@@ -41,8 +41,7 @@ Number.prototype.factorial = function () {
 (function () {
   "use strict";
 
-  var Cover = { width: undefined, height: undefined },
-    opts = { game: null, difficulty: null },
+  var opts = { game: null, difficulty: null },
     difficulties = [
       { d: 'leicht', n: 3, m: 4 },
       { d: 'mittel', n: 4, m: 5 },
@@ -98,17 +97,15 @@ Number.prototype.factorial = function () {
   function resize() {
     var x, y, dw, dh, tw, th, persp, bgpos, cells = $('table#puzzle td');
     if ($(window).width() >= 480) {
-      Cover.width = 411;
-      Cover.height = 582;
+      dw = 411 / N;
+      dh = 582 / M;
       persp = 2;
     }
     else {
-      Cover.width = 274;
-      Cover.height = 388;
+      dw = 274 / N;
+      dh = 388 / M;
       persp = 3;
     }
-    dw = Cover.width / N;
-    dh = Cover.height / M;
     tw = Math.floor(dw) + 'px';
     th = Math.floor(dh) + 'px';
     $('.front').css('width', tw).css('height', th);
