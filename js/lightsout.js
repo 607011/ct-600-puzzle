@@ -41,13 +41,15 @@ Number.prototype.factorial = function () {
 var CTLIGHTSOUT = (function () {
   "use strict";
 
-  var difficulties = {
-    'leicht': { n: 3, m: 4 },
-    'mittel': { n: 4, m: 5 },
-    'schwer': { n: 7, m: 10 }
-  },
+  var opts = { game: undefined, difficulty: undefined },
+    difficulties = [
+      { d: 'leicht', n: 3, m: 4 },
+      { d: 'mittel', n: 4, m: 5 },
+      { d: 'schwer', n: 7, m: 10 }
+    ],
     rng = new RNG(),
-    puzzle, moves, solution, gameNum,
+    puzzle, moves,
+    solution, /* TODO: alles damit Zusammenhängende für Finalversion entfernen! */
     N, M, nFields, nTurns, nCombinations;
 
 
@@ -137,8 +139,8 @@ var CTLIGHTSOUT = (function () {
   function initPuzzle() {
     var f, x, y, i, selected;
     clearPuzzle();
-    rng.seed(gameNum);
-    $('#game-number').text(gameNum);
+    rng.seed(opts.game);
+    $('#game-number').text(opts.game);
     selected = [];
     solution = [];
     i = nTurns;
@@ -157,25 +159,15 @@ var CTLIGHTSOUT = (function () {
   }
 
 
-  function setDifficulty(difficulty) {
-    difficulty = difficulty || 'mittel';
-    N = difficulties[difficulty].n;
-    M = difficulties[difficulty].m;
+  function newGame(difficulty, num) {
+    opts.difficulty = (typeof difficulty === 'undefined') ? 0 : difficulty;
+    N = difficulties[opts.difficulty].n;
+    M = difficulties[opts.difficulty].m;
     nFields = N * M;
     nTurns = nFields / 2;
     nCombinations = nFields.factorial() / (nTurns.factorial() * (nFields - nTurns).factorial());
-  }
-
-
-  function setGameNum(num) {
-    gameNum = num || Math.floor(Math.random() * nCombinations);
-    document.location.hash = '#' + gameNum;
-  }
-
-
-  function newGame(num, difficulty) {
-    setDifficulty(difficulty);
-    setGameNum(num);
+    opts.game = Math.max(0, Math.min(typeof num === 'number' ? num : Math.floor(Math.random() * nCombinations), 4294967296));
+    document.location.hash = $.map(opts, function (value, key) { return key + '=' + value; }).join(';');
     moves = [];
     $('#moves').empty();
     initPuzzle();
@@ -194,8 +186,26 @@ var CTLIGHTSOUT = (function () {
 
   return {
     init: function () {
-      $('button#new-game').click(function () { newGame() });
-      newGame((document.location.hash.length > 1) ? parseInt(document.location.hash.substring(1), 10) : Math.floor(Math.random() * nCombinations));
+      var p;
+      if (document.location.hash.length > 1) {
+        p = document.location.hash.substring(1).split(';');
+        $.each(p, function (i, d) {
+          var p = d.split('=');
+          opts[p[0]] = parseInt(p[1], 10);
+        });
+      }
+      $('button#new-game').click(function () { newGame(parseInt($('#d-container').val(), 10)) });
+      newGame(
+        typeof opts.difficulty === 'number' ? Math.min(Math.max(opts.difficulty, 0), difficulties.length - 1) : 1,
+        typeof opts.game === 'number' ? opts.game : undefined
+      );
+      $.each(difficulties, function (i, d) {
+        $('#d-container').append($('<option></option>').attr('value', i).text(d.d));
+      });
+      $('#d-container').change(function () {
+        var difficulty = parseInt($('#d-container').val(), 10);
+        newGame(difficulty);
+      }).val(opts.difficulty);
     }
   };
 
