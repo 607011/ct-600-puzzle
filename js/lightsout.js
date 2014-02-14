@@ -124,7 +124,7 @@ var CTLIGHTSOUT = (function () {
             $('#moves').append('[' + x + ',' + y + '] ');
             $('button#hint').prop('disabled', true);
             $('button#again').prop('disabled', false);
-            setTimeout(checkFinished, 100);
+            setTimeout(checkFinished, 500);
           }.bind(null, x, y))
           .append(fOld)
           .append(fNew);
