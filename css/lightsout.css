@@ -1,3 +1,5 @@
+@charset 'utf-8';
+
 * {
   margin: 0;
   padding: 0;
@@ -20,7 +22,7 @@ html, body {
 }
 
 #puzzle-container {
-  margin: 0 auto;
+  display: block;
   padding: 10px 0;
   position: relative;
 }
@@ -30,13 +32,20 @@ html, body {
 }
 
 #moves {
-  font-family: monospace;
-  font-size: 10px;
+  font-size: 14px;
+  display: inline-block;
+  min-width: 66px;
+  vertical-align: middle;
+}
+
+#moves::before {
+  content: 'Züge: ';
 }
 
 #controls {
   margin: 0 auto;
   text-align: center;
+  display: block;
 }
 
 #game-number {
@@ -208,11 +217,11 @@ table#puzzle {
 
 button {
   border: 1px solid #1b1d1e;
+  background-color: #bfd2db;
   cursor: pointer;
   padding: 0 0.5em;
   font-family: -apple-system-font, Helvetica, Arial, Verdana, sans-serif;
   font-size: 14px;
-  background-color: #bfd2db;
   height: 44px;
   min-width: 44px;
 }

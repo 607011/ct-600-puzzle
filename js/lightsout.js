@@ -154,7 +154,7 @@ Number.prototype.factorial = function () {
           .click(function (x, y) {
             turn(x, y);
             moves.push({ x: x, y: y });
-            // $('#moves').append('[' + x + ',' + y + '] ');
+            $('#moves').text(moves.length);
             $('button#hint').prop('disabled', true);
             $('button#again').prop('disabled', false);
             setTimeout(checkFinished, 450);
@@ -215,7 +215,7 @@ Number.prototype.factorial = function () {
     opts.game = Math.max(0, Math.min(typeof num === 'number' ? num : Math.floor(Math.random() * nCombinations % 4294967296), 4294967296));
     document.location.hash = $.map(opts, function (value, key) { return key + '=' + value; }).join(';');
     moves = [];
-    $('#moves').empty();
+    $('#moves').text(0);
     $('button#again').prop('disabled', true);
     $('button#hint').prop('disabled', false);
     initPuzzle();
