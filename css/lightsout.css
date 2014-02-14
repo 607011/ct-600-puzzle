@@ -243,12 +243,11 @@ select {
 }
 
 body.readme {
-  margin: 0 auto;
   padding: 0.5ex 0.5em;
 }
 
 p {
-  margin: 1ex 0;
+  padding: 1ex 0;
 }
 
 footer {
@@ -270,3 +269,16 @@ a {
   a:hover {
     text-decoration: underline;
   }
+
+dl {
+  padding-top: 1ex;
+  padding-bottom: 2ex;
+}
+
+dt {
+  font-weight: bold;
+}
+dd {
+  padding-left: 1em;
+}
+
