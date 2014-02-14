@@ -173,15 +173,7 @@ var CTLIGHTSOUT = (function () {
     $('#moves').empty();
     initPuzzle();
     $('button#again').prop('disabled', true);
-    $('button#hint').prop('disabled', false)
-      .click(function () {
-        var i, f;
-        for (i = 0; i < solution.length; ++i) {
-          f = solution[i];
-          $('#back-' + f.x + '-' + f.y).toggleClass('hint');
-          $('#front-' + f.x + '-' + f.y).toggleClass('hint');
-        }
-      });
+    $('button#hint').prop('disabled', false);
   }
 
 
@@ -201,6 +193,14 @@ var CTLIGHTSOUT = (function () {
           opts[p[0]] = parseInt(p[1], 10);
         });
       }
+      $('button#hint').click(function () {
+        var i, f;
+        for (i = 0; i < solution.length; ++i) {
+          f = solution[i];
+          $('#back-' + f.x + '-' + f.y).toggleClass('hint');
+          $('#front-' + f.x + '-' + f.y).toggleClass('hint');
+        }
+      });
       $('button#again').click(restart).prop('disabled', true);
       $('button#new-game').click(function () { newGame(parseInt($('#d-container').val(), 10)) });
       newGame(
