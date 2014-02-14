@@ -77,6 +77,23 @@ var CTLIGHTSOUT = (function () {
   }
 
 
+  function checkFinished() {
+    var fields = puzzle.reduce(
+      function (prev, current) {
+        return prev.concat(current);
+      }),
+      finished = fields.every(function (ele) {
+        return ele === 1;
+      }) || fields.every(function (ele) {
+        return ele === 0;
+      });
+    if (finished) {
+      alert('Juhuuu! Du hast das Puzzle mit ' + moves.length + ' Zügen gelöst!');
+      newGame();
+    }
+  }
+
+
   function drawPuzzle() {
     var x, y, p = $('#puzzle'), tr, td, fOld, fNew;
     p.empty();
@@ -115,23 +132,6 @@ var CTLIGHTSOUT = (function () {
       puzzle[x] = new Array(M);
       for (y = 0; y < M; ++y)
         puzzle[x][y] = 0x1;
-    }
-  }
-
-
-  function checkFinished() {
-    var fields = puzzle.reduce(
-      function (prev, current) {
-        return prev.concat(current);
-      }),
-      finished = fields.every(function (ele) {
-        return ele === 1;
-      }) || fields.every(function (ele) {
-        return ele === 0;
-      });
-    if (finished) {
-      alert('Juhuuu! Du hast das Puzzle mit ' + moves.length + ' Zügen gelöst!');
-      newGame();
     }
   }
 
