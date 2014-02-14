@@ -41,7 +41,7 @@ Number.prototype.factorial = function () {
 (function () {
   "use strict";
 
-  var Cover = { width: 411, height: 582 },
+  var Cover = { width: undefined, height: undefined },
     opts = { game: null, difficulty: null },
     difficulties = [
       { d: 'leicht', n: 3, m: 4 },
@@ -96,78 +96,70 @@ Number.prototype.factorial = function () {
 
 
   function resize() {
-    var x, y, perspective;
+    var x, y, dw, dh, tw, th, persp, bgpos, cells = $('table#puzzle td');
     if ($(window).width() >= 480) {
       Cover.width = 411;
       Cover.height = 582;
-      perspective = 2;
+      persp = 2;
     }
     else {
       Cover.width = 274;
       Cover.height = 388;
-      perspective = 3;
+      persp = 3;
     }
-    $('.front')
-      .css('width', Math.floor(Cover.width / N) + 'px')
-      .css('height', Math.floor(Cover.height / M) + 'px');
-    $('.back')
-      .css('width', Math.floor(Cover.width / N) + 'px')
-      .css('height', Math.floor(Cover.height / M) + 'px');
-    $('table#puzzle td')
-      .css('width', Math.floor(Cover.width / N) + 'px')
-      .css('height', Math.floor(Cover.height / M) + 'px');
+    dw = Cover.width / N;
+    dh = Cover.height / M;
+    tw = Math.floor(dw) + 'px';
+    th = Math.floor(dh) + 'px';
+    $('.front').css('width', tw).css('height', th);
+    $('.back').css('width', tw).css('height', th);
+    cells.css('width', tw).css('height', th);
     for (y = 0; y < M; ++y) {
       for (x = 0; x < N; ++x) {
-        $('#back-' + x + '-' + y).css('background-position', Math.floor(-x * Cover.width / N) + 'px ' + Math.floor(-y * Cover.height / M) + 'px');
-        $('#front-' + x + '-' + y).css('background-position', Math.floor(-x * Cover.width / N) + 'px ' + Math.floor(-y * Cover.height / M) + 'px');
+        bgpos = Math.floor(-x * dw) + 'px ' + Math.floor(-y * dh) + 'px';
+        $('#back-' + x + '-' + y).css('background-position', bgpos);
+        $('#front-' + x + '-' + y).css('background-position', bgpos);
       }
     }
     $.each(['-moz-', '-ms-', '-webkit-', ''], function (i, prefix) {
-      $('table#puzzle td').css(prefix + 'perspective', Math.floor(perspective * Cover.width / N) + 'px');
+      cells.css(prefix + 'perspective', Math.floor(persp * dw) + 'px');
     });
   }
 
 
+  function clickTile(x, y) {
+    turn(x, y);
+    moves.push({ x: x, y: y });
+    $('#moves').text(moves.length);
+    $('button#hint').prop('disabled', true);
+    $('button#again').prop('disabled', false);
+    setTimeout(checkFinished, 450);
+  }
+
+
   function drawPuzzle() {
-    var x, y, p = $('#puzzle'), tr, td, fOld, fNew;
+    var x, y, p = $('table#puzzle'), tr, td, fOld, fNew;
     p.empty();
     for (y = 0; y < M; ++y) {
       tr = $('<tr></tr>');
       for (x = 0; x < N; ++x) {
         fOld = $('<span></span>')
           .attr('id', 'back-' + x + '-' + y)
-          .css('background-position', Math.floor(-x * Cover.width / N) + 'px ' + Math.floor(-y * Cover.height / M) + 'px')
-          .css('width', Math.floor(Cover.width / N) + 'px')
-          .css('height', Math.floor(Cover.height / M) + 'px')
           .addClass('three-d back')
           .addClass(puzzle[x][y] === 0 ? 'old' : 'new');
         fNew = $('<span></span>')
           .attr('id', 'front-' + x + '-' + y)
-          .css('background-position', Math.floor(-x * Cover.width / N) + 'px ' + Math.floor(-y * Cover.height / M) + 'px')
-          .css('width', Math.floor(Cover.width / N) + 'px')
-          .css('height', Math.floor(Cover.height / M) + 'px')
           .addClass('three-d front')
           .addClass(puzzle[x][y] === 1 ? 'old' : 'new');
         td = $('<td></td>')
-          .css('width', Math.floor(Cover.width / N) + 'px')
-          .css('height', Math.floor(Cover.height / M) + 'px')
-          .click(function (x, y) {
-            turn(x, y);
-            moves.push({ x: x, y: y });
-            $('#moves').text(moves.length);
-            $('button#hint').prop('disabled', true);
-            $('button#again').prop('disabled', false);
-            setTimeout(checkFinished, 450);
-          }.bind(null, x, y))
+          .click(clickTile.bind(null, x, y))
           .append(fOld)
           .append(fNew);
         tr.append(td);
       }
       p.append(tr);
     }
-    $.each(['-moz-', '-ms-', '-webkit-', ''], function (i, prefix) {
-      $('table#puzzle td').css(prefix + 'perspective', Math.floor(2 * Cover.width / N) + 'px');
-    });
+    resize();
   }
 
 

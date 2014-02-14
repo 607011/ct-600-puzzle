@@ -32,14 +32,26 @@ html, body {
 }
 
 #moves {
-  font-size: 14px;
   display: inline-block;
   min-width: 66px;
-  vertical-align: middle;
 }
 
-#moves::before {
+#moves:before {
   content: 'Züge: ';
+}
+
+#info {
+  margin: 0 auto;
+  text-align: center;
+  display: block;
+}
+
+#game-number {
+  display: inline-block;
+}
+
+#game-number:before,  #game-number:after {
+  content: '#';
 }
 
 #controls {
@@ -48,18 +60,12 @@ html, body {
   display: block;
 }
 
-#game-number {
-  margin: 1ex auto;
-  text-align: center;
-}
-
-#game-number:before {
-  content: '#';
-}
-
 table#puzzle {
   border-collapse: collapse;
   margin: 10px auto;
+  border: 1px solid #2f3233;
+  background-color: #2f3233;
+  box-shadow: #2f3233 0px 0px 6px;
 }
 
   table#puzzle td {
@@ -257,12 +263,11 @@ p {
 
 footer {
   position: relative;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  margin: 0 auto;
   text-align: center;
   padding: 0.5ex 1em;
   font-size: smaller;
+  max-width: 411px;
 }
 
 a {
@@ -291,11 +296,16 @@ dd {
   html, body {
     font-size: 14px;
   }
+
   table#puzzle td .three-d.old {
     background-image: url('../img/cover0-388.jpg');
   }
 
   table#puzzle td .three-d.new {
     background-image: url('../img/cover1-388.jpg');
+  }
+
+  footer {
+    max-width: 274px;
   }
 }
