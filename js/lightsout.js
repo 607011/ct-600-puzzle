@@ -172,14 +172,14 @@ var CTLIGHTSOUT = (function () {
     moves = [];
     $('#moves').empty();
     initPuzzle();
-    $('button#hint')
-      .prop('disabled', false)
+    $('button#again').prop('disabled', true);
+    $('button#hint').prop('disabled', false)
       .click(function () {
         var i, f;
         for (i = 0; i < solution.length; ++i) {
           f = solution[i];
-          $('#back-' + f.x + '-' + f.y).addClass('hint');
-          $('#front-' + f.x + '-' + f.y).addClass('hint');
+          $('#back-' + f.x + '-' + f.y).toggleClass('hint');
+          $('#front-' + f.x + '-' + f.y).toggleClass('hint');
         }
       });
   }
