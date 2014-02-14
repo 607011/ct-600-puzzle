@@ -1,5 +1,5 @@
 /*
-    c't Lights Out Puzzle
+    c't Cover Switch
     Copyright (c) 2014 Oliver Lau <ola@ct.de>, Heise Zeitschriften Verlag
 
     This program is free software: you can redistribute it and/or modify
@@ -92,6 +92,39 @@ Number.prototype.factorial = function () {
       alert('Juhuuu! Du hast das Puzzle mit ' + moves.length + ' Zügen gelöst!');
       newGame();
     }
+  }
+
+
+  function resize() {
+    var x, y, perspective;
+    if ($(window).width() >= 480) {
+      Cover.width = 411;
+      Cover.height = 582;
+      perspective = 2;
+    }
+    else {
+      Cover.width = 274;
+      Cover.height = 388;
+      perspective = 3;
+    }
+    $('.front')
+      .css('width', Math.floor(Cover.width / N) + 'px')
+      .css('height', Math.floor(Cover.height / M) + 'px');
+    $('.back')
+      .css('width', Math.floor(Cover.width / N) + 'px')
+      .css('height', Math.floor(Cover.height / M) + 'px');
+    $('table#puzzle td')
+      .css('width', Math.floor(Cover.width / N) + 'px')
+      .css('height', Math.floor(Cover.height / M) + 'px');
+    for (y = 0; y < M; ++y) {
+      for (x = 0; x < N; ++x) {
+        $('#back-' + x + '-' + y).css('background-position', Math.floor(-x * Cover.width / N) + 'px ' + Math.floor(-y * Cover.height / M) + 'px');
+        $('#front-' + x + '-' + y).css('background-position', Math.floor(-x * Cover.width / N) + 'px ' + Math.floor(-y * Cover.height / M) + 'px');
+      }
+    }
+    $.each(['-moz-', '-ms-', '-webkit-', ''], function (i, prefix) {
+      $('table#puzzle td').css(prefix + 'perspective', Math.floor(perspective * Cover.width / N) + 'px');
+    });
   }
 
 
@@ -196,24 +229,16 @@ Number.prototype.factorial = function () {
 
 
   function preloadImages(callback) {
-    var IMAGES = ['img/cover0.jpg', 'img/cover1.jpg'],
+    var IMAGES = ['img/cover0-388.jpg', 'img/cover1-388.jpg', 'img/cover0-582.jpg', 'img/cover1-582.jpg'],
       i, loaded = 0, N = IMAGES.length;
     for (i = 0; i < N; ++i) {
       var img = new Image();
       img.onload = function() {
-        if (++loaded === N) {
-          Cover.width = img.width;
-          Cover.height = img.height;
+        if (++loaded === N)
           callback.call();
-        }
       }
       img.src = IMAGES[i];
     }
-  }
-
-
-  function resize() {
-    console.log($(window).width(), $(window).height());
   }
 
 

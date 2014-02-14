@@ -54,8 +54,6 @@ table#puzzle {
 }
 
   table#puzzle td {
-    width: 44px;
-    height: 44px;
     text-align: center;
     cursor: pointer;
     padding: 0;
@@ -78,7 +76,7 @@ table#puzzle {
   }
 
   table#puzzle .hint {
-    opacity: 0.54;
+    opacity: 0.5;
   }
 
   table#puzzle td > span.three-d {
@@ -86,8 +84,6 @@ table#puzzle {
     top: 0;
     left: 0;
     display: inline-block;
-    width: 44px;
-    height: 44px;
     -moz-backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
@@ -95,11 +91,11 @@ table#puzzle {
   }
 
   table#puzzle td .three-d.old {
-    background-image: url('../img/cover0.jpg');
+    background-image: url('../img/cover0-582.jpg');
   }
 
   table#puzzle td .three-d.new {
-    background-image: url('../img/cover1.jpg');
+    background-image: url('../img/cover1-582.jpg');
   }
 
   table#puzzle td .three-d.front {
@@ -282,3 +278,15 @@ dd {
   padding-left: 1em;
 }
 
+@media screen and (max-width: 480px) {
+  html, body {
+    font-size: 14px;
+  }
+  table#puzzle td .three-d.old {
+    background-image: url('../img/cover0-388.jpg');
+  }
+
+  table#puzzle td .three-d.new {
+    background-image: url('../img/cover1-388.jpg');
+  }
+}
