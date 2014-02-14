@@ -69,10 +69,10 @@ table#puzzle {
     padding: 0;
     -webkit-transform-style: preserve-3d;
     transform-style: preserve-3d;
-    -moz-perspective: 88px;
-    -ms-perspective: 88px;
-    -webkit-perspective: 88px;
-    perspective: 88px;
+    -moz-perspective: 132px;
+    -ms-perspective: 132px;
+    -webkit-perspective: 132px;
+    perspective: 132px;
     -moz-perspective-origin: center center;
     -ms-perspective-origin: center center;
     -webkit-perspective-origin: center center;
@@ -86,7 +86,7 @@ table#puzzle {
   }
 
   table#puzzle .hint {
-    opacity: 0.84;
+    opacity: 0.8;
   }
 
   table#puzzle td > span.three-d {
