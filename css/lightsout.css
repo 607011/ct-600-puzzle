@@ -61,10 +61,10 @@ table#puzzle {
     padding: 0;
     -webkit-transform-style: preserve-3d;
     transform-style: preserve-3d;
-    -moz-perspective: 132px;
-    -ms-perspective: 132px;
-    -webkit-perspective: 132px;
-    perspective: 132px;
+    -moz-perspective: 300px;
+    -ms-perspective: 300px;
+    -webkit-perspective: 300px;
+    perspective: 300px;
     -moz-perspective-origin: center center;
     -ms-perspective-origin: center center;
     -webkit-perspective-origin: center center;
@@ -78,7 +78,7 @@ table#puzzle {
   }
 
   table#puzzle .hint {
-    opacity: 0.8;
+    opacity: 0.54;
   }
 
   table#puzzle td > span.three-d {
@@ -91,15 +91,15 @@ table#puzzle {
     -moz-backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
-    border: 1px solid #111;
+    background-repeat: no-repeat;
   }
 
   table#puzzle td .three-d.old {
-    background-color: #ce681f;
+    background-image: url('../img/cover0.jpg');
   }
 
   table#puzzle td .three-d.new {
-    background-color: #35bb2b;
+    background-image: url('../img/cover1.jpg');
   }
 
   table#puzzle td .three-d.front {
@@ -251,7 +251,7 @@ p {
 }
 
 footer {
-  position: absolute;
+  position: relative;
   bottom: 0;
   left: 0;
   right: 0;

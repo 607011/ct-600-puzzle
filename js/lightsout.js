@@ -41,7 +41,8 @@ Number.prototype.factorial = function () {
 var CTLIGHTSOUT = (function () {
   "use strict";
 
-  var opts = { game: undefined, difficulty: undefined },
+  var Cover = { width: 411, height: 582, aspect: 29.7 / 21.0 },
+    opts = { game: undefined, difficulty: undefined },
     difficulties = [
       { d: 'leicht', n: 3, m: 4 },
       { d: 'mittel', n: 4, m: 5 },
@@ -102,13 +103,21 @@ var CTLIGHTSOUT = (function () {
       for (x = 0; x < N; ++x) {
         fOld = $('<span></span>')
           .attr('id', 'back-' + x + '-' + y)
+          .css('background-position', Math.floor(-x * Cover.width / N) + 'px ' + Math.floor(-y * Cover.height / M) + 'px')
+          .css('width', Math.floor(Cover.width / N) + 'px')
+          .css('height', Math.floor(Cover.height / M) + 'px')
           .addClass('three-d back')
           .addClass(puzzle[x][y] === 0 ? 'old' : 'new');
         fNew = $('<span></span>')
           .attr('id', 'front-' + x + '-' + y)
+          .css('background-position', Math.floor(-x * Cover.width / N) + 'px ' + Math.floor(-y * Cover.height / M) + 'px')
+          .css('width', Math.floor(Cover.width / N) + 'px')
+          .css('height', Math.floor(Cover.height / M) + 'px')
           .addClass('three-d front')
           .addClass(puzzle[x][y] === 1 ? 'old' : 'new');
         td = $('<td></td>')
+          .css('width', Math.floor(Cover.width / N) + 'px')
+          .css('height', Math.floor(Cover.height / M) + 'px')
           .click(function (x, y) {
             turn(x, y);
             moves.push({ x: x, y: y });
@@ -123,6 +132,9 @@ var CTLIGHTSOUT = (function () {
       }
       p.append(tr);
     }
+    $.each(['-moz-', '-ms-', '-webkit-', ''], function (i, prefix) {
+      $('table#puzzle td').css(prefix + 'perspective', Math.floor(2 * Cover.width / N) + 'px');
+    });
   }
 
 
@@ -171,9 +183,9 @@ var CTLIGHTSOUT = (function () {
     document.location.hash = $.map(opts, function (value, key) { return key + '=' + value; }).join(';');
     moves = [];
     $('#moves').empty();
-    initPuzzle();
     $('button#again').prop('disabled', true);
     $('button#hint').prop('disabled', false);
+    initPuzzle();
   }
 
 
@@ -189,11 +201,19 @@ var CTLIGHTSOUT = (function () {
     for (i = 0; i < N; ++i) {
       var img = new Image();
       img.onload = function() {
-        if (++loaded === N)
+        if (++loaded === N) {
+          Cover.width = img.width;
+          Cover.height = img.height;
           callback.call();
+        }
       }
       img.src = IMAGES[i];
     }
+  }
+
+
+  function resize() {
+    console.log($(window).width(), $(window).height());
   }
 
 
@@ -229,6 +249,7 @@ var CTLIGHTSOUT = (function () {
           var difficulty = parseInt($('#d-container').val(), 10);
           newGame(difficulty);
         }).val(opts.difficulty);
+        $(window).resize(resize).trigger('resize');
       });
     }
   };
