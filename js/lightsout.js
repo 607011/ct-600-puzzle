@@ -160,7 +160,7 @@ var CTLIGHTSOUT = (function () {
 
 
   function newGame(difficulty, num) {
-    opts.difficulty = (typeof difficulty === 'undefined') ? 0 : difficulty;
+    opts.difficulty = (typeof difficulty === 'number') ? difficulty : opts.difficulty;
     N = difficulties[opts.difficulty].n;
     M = difficulties[opts.difficulty].m;
     nFields = N * M;
