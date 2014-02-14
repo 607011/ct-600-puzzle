@@ -38,11 +38,11 @@ Number.prototype.factorial = function () {
 };
 
 
-var CTLIGHTSOUT = (function () {
+(function () {
   "use strict";
 
-  var Cover = { width: 411, height: 582, aspect: 29.7 / 21.0 },
-    opts = { game: undefined, difficulty: undefined },
+  var Cover = { width: 411, height: 582 },
+    opts = { game: null, difficulty: null },
     difficulties = [
       { d: 'leicht', n: 3, m: 4 },
       { d: 'mittel', n: 4, m: 5 },
@@ -55,7 +55,7 @@ var CTLIGHTSOUT = (function () {
 
 
   function flip(x, y) {
-    puzzle[x][y] ^= 0x1;
+    puzzle[x][y] ^= 1;
     $('#back-' + x + '-' + y).toggleClass('front').toggleClass('back');
     $('#front-' + x + '-' + y).toggleClass('front').toggleClass('back');
   }
@@ -121,10 +121,10 @@ var CTLIGHTSOUT = (function () {
           .click(function (x, y) {
             turn(x, y);
             moves.push({ x: x, y: y });
-            $('#moves').append('[' + x + ',' + y + '] ');
+            // $('#moves').append('[' + x + ',' + y + '] ');
             $('button#hint').prop('disabled', true);
             $('button#again').prop('disabled', false);
-            setTimeout(checkFinished, 500);
+            setTimeout(checkFinished, 450);
           }.bind(null, x, y))
           .append(fOld)
           .append(fNew);
@@ -144,7 +144,7 @@ var CTLIGHTSOUT = (function () {
     for (x = 0; x < N; ++x) {
       puzzle[x] = new Array(M);
       for (y = 0; y < M; ++y)
-        puzzle[x][y] = 0x1;
+        puzzle[x][y] = 1;
     }
   }
 
@@ -217,41 +217,42 @@ var CTLIGHTSOUT = (function () {
   }
 
 
-  return {
-    init: function () {
-      preloadImages(function () {
-        var p;
-        if (document.location.hash.length > 1) {
-          p = document.location.hash.substring(1).split(';');
-          $.each(p, function (i, d) {
-            var p = d.split('=');
-            opts[p[0]] = parseInt(p[1], 10);
-          });
+  function init() {
+    preloadImages(function () {
+      var p;
+      if (document.location.hash.length > 1) {
+        p = document.location.hash.substring(1).split(';');
+        $.each(p, function (i, d) {
+          var p = d.split('=');
+          opts[p[0]] = parseInt(p[1], 10);
+        });
+      }
+      $('button#hint').click(function () {
+        var i, f;
+        for (i = 0; i < solution.length; ++i) {
+          f = solution[i];
+          $('#back-' + f.x + '-' + f.y).toggleClass('hint');
+          $('#front-' + f.x + '-' + f.y).toggleClass('hint');
         }
-        $('button#hint').click(function () {
-          var i, f;
-          for (i = 0; i < solution.length; ++i) {
-            f = solution[i];
-            $('#back-' + f.x + '-' + f.y).toggleClass('hint');
-            $('#front-' + f.x + '-' + f.y).toggleClass('hint');
-          }
-        });
-        $('button#again').click(restart).prop('disabled', true);
-        $('button#new-game').click(function () { newGame(parseInt($('#d-container').val(), 10)) });
-        newGame(
-          typeof opts.difficulty === 'number' ? Math.min(Math.max(opts.difficulty, 0), difficulties.length - 1) : 1,
-          typeof opts.game === 'number' ? opts.game : undefined
-        );
-        $.each(difficulties, function (i, d) {
-          $('#d-container').append($('<option></option>').attr('value', i).text(d.d));
-        });
-        $('#d-container').change(function () {
-          var difficulty = parseInt($('#d-container').val(), 10);
-          newGame(difficulty);
-        }).val(opts.difficulty);
-        $(window).resize(resize).trigger('resize');
       });
-    }
-  };
+      $('button#again').click(restart).prop('disabled', true);
+      $('button#new-game').click(function () { newGame(parseInt($('#d-container').val(), 10)) });
+      newGame(
+        typeof opts.difficulty === 'number' ? Math.min(Math.max(opts.difficulty, 0), difficulties.length - 1) : 1,
+        typeof opts.game === 'number' ? opts.game : undefined
+      );
+      $.each(difficulties, function (i, d) {
+        $('#d-container').append($('<option></option>').attr('value', i).text(d.d));
+      });
+      $('#d-container').change(function () {
+        var difficulty = parseInt($('#d-container').val(), 10);
+        newGame(difficulty);
+      }).val(opts.difficulty);
+      $(window).resize(resize).trigger('resize');
+    });
+  }
+
+
+  $(document).ready(init);
 
 })();
