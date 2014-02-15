@@ -38,14 +38,214 @@ Number.prototype.factorial = function () {
 };
 
 
+var Solver = (function () {
+  "use strict";
+  /// Original solver by Norio Kato, http://www.ueda.info.waseda.ac.jp/~n-kato/lightsout/ 
+  /// Modified by Oliver Lau <ola@ct.de>
+  var mat,    // integer[i][j]
+    cols,   // integer[]
+    m,      // count of rows of the matrix
+    n,      // count of columns of the matrix
+    np,     // count of columns of the enlarged matrix
+    r,      // minimum rank of the matrix
+    maxr,   // maximum rank of the matrix
+    nStates = 2,
+    colcount,
+    rowcount,
+    cells;  // integer[row][col], current states of tiles
+
+  function a(i, j) {
+    return mat[i][cols[j]];
+  }
+
+  function setmat(i, j, val) {
+    mat[i][cols[j]] = modulate(val);
+  }
+
+  function modulate(x) {
+    // returns z such that 0 <= z < nStates and x == z (mod nStates)
+    if (x >= 0)
+      return x % nStates;
+    x = (-x) % nStates;
+    if (x === 0)
+      return 0;
+    return nStates - x;
+  }
+
+  function gcd(x, y) { // call when: x >= 0 and y >= 0
+    if (y === 0)
+      return x;
+    if (x === y)
+      return x;
+    if (x > y)
+      x = x % y; // x < y
+    while (x > 0) {
+      y = y % x; // y < x
+      if (y === 0)
+        return x;
+      x = x % y; // x < y
+    }
+    return y;
+  }
+
+  function invert(value) { // call when: 0 <= value < nStates
+    var seed, a = 1, b = 0, c = 0, d = 1, x, y = nStates, tmp;
+    // returns z such that value * z == 1 (mod nStates), or 0 if no such z
+    if (value <= 1)
+      return value;
+    x = value;
+    seed = gcd(value, nStates);
+    if (seed !== 1)
+      return 0;
+    while (x > 1) {
+      tmp = Math.floor(y / x);
+      y -= x * tmp;
+      c -= a * tmp;
+      d -= b * tmp;
+      tmp = a; a = c; c = tmp;
+      tmp = b; b = d; d = tmp;
+      tmp = x; x = y; y = tmp;
+    }
+    return a;
+  }
+
+  function initMatrix() {
+    var col, row, i, j, line;
+    maxr = Math.min(m, n);
+    mat = new Array();
+    for (col = 0; col < colcount; ++col)
+      for (row = 0; row < rowcount; ++row) {
+        i = row * colcount + col;
+        line = new Array();
+        mat[i] = line;
+        for (j = 0; j < n; ++j)
+          line[j] = 0;
+        line[i] = 1;
+        if (col > 0)
+          line[i - 1] = 1;
+        if (row > 0)
+          line[i - colcount] = 1;
+        if (col < colcount - 1)
+          line[i + 1] = 1;
+        if (row < rowcount - 1)
+          line[i + colcount] = 1;
+      }
+    cols = new Array();
+    for (j = 0; j < np; ++j)
+      cols[j] = j;
+  }
+
+  function solveProblem(goal) {
+    var size = colcount * rowcount, col, row;
+    m = size;
+    n = size;
+    np = n + 1;
+    initMatrix();
+    for (col = 0; col < colcount; ++col)
+      for (row = 0; row < rowcount; ++row)
+        mat[row * colcount + col][n] = modulate(goal - cells[col][row]);
+    return sweep();
+  }
+
+  function sweep() {
+    for (r = 0; r < maxr; r++) {
+      if (!sweepStep())
+        return false; // failed in founding a solution
+      if (r === maxr)
+        break;
+    }
+    return true; // successfully found a solution
+  }
+
+  function sweepStep() {
+    var i, j, finished = true, inv, aij, jj;
+    for (j = r; j < n; ++j) {
+      for (i = r; i < m; ++i) {
+        aij = a(i, j);
+        if (aij !== 0)
+          finished = false;
+        inv = invert(aij);
+        if (inv !== 0) {
+          for (jj = r; jj < np; ++jj)
+            setmat(i, jj, a(i, jj) * inv);
+          doBasicSweep(i, j);
+          return true;
+        }
+      }
+    }
+    if (finished) { // we have: 0x = b (every matrix element is 0)
+      maxr = r;   // rank(A) == maxr
+      for (j = n; j < np; ++j)
+        for (i = r; i < m; ++i)
+          if (a(i, j) != 0)
+            return false; // no solution since b != 0
+      return true;    // 0x = 0 has solutions including x = 0
+    }
+    return false; // failed in finding a solution
+  }
+
+  function swap(array, x, y) {
+    var tmp = array[x];
+    array[x] = array[y];
+    array[y] = tmp;
+  }
+
+  function doBasicSweep(pivoti, pivotj) {
+    var i, j, air;
+    if (r !== pivoti)
+      swap(mat, r, pivoti);
+    if (r !== pivotj)
+      swap(cols, r, pivotj);
+    for (i = 0; i < m; ++i) {
+      if (i !== r) {
+        var air = a(i, r);
+        if (air !== 0)
+          for (j = r; j < np; ++j)
+            setmat(i, j, a(i, j) - a(r, j) * air);
+      }
+    }
+  }
+  function solved() {
+    var j, col, row, solution, solutions = [], goal, anscols, value;
+    for (goal = 0; goal < nStates; goal++) {
+      solution = new Array(colcount);
+      for (col = 0; col < colcount; ++col)
+        solution[col] = new Array(rowcount);
+      if (solveProblem(goal)) { // found an integer solution
+        anscols = new Array();
+        for (j = 0; j < n; j++)
+          anscols[cols[j]] = j;
+        for (col = 0; col < colcount; col++) {
+          for (row = 0; row < rowcount; row++) {
+            j = anscols[row * colcount + col];
+            value = (j < r) ? a(j, n) : '';
+            solution[col][row] = ([ ' ', 'x' ])[a(j, n)];
+          }
+        }
+        solutions.push(solution);
+      }
+    }
+    return solutions;
+  }  return {
+    solve: function (puzzle) {
+      cells = puzzle;
+      colcount = cells.length;
+      rowcount = cells[0].length;
+      return solved();
+    }
+  }
+})();
+
+
+
 (function () {
   "use strict";
 
   var opts = { game: null, difficulty: null },
     difficulties = [
       { d: 'leicht', n: 3, m: 4 },
-      { d: 'mittel', n: 4, m: 5 },
-      { d: 'schwer', n: 7, m: 10 }
+      { d: 'schwer', n: 4, m: 5 },
+      { d: 'extrem', n: 7, m: 10 }
     ],
     rng = new RNG(),
     puzzle, moves,
@@ -223,7 +423,7 @@ Number.prototype.factorial = function () {
       i, loaded = 0, N = IMAGES.length;
     for (i = 0; i < N; ++i) {
       var img = new Image();
-      img.onload = function() {
+      img.onload = function () {
         if (++loaded === N)
           callback.call();
       }
@@ -242,6 +442,21 @@ Number.prototype.factorial = function () {
           opts[p[0]] = parseInt(p[1], 10);
         });
       }
+      $('button#solve').click(function () {
+        var solution, solutions = Solver.solve(puzzle),
+          s = [$('table#solution0'), $('table#solution1')],
+          i, x, y, tr, td;
+        for (i = 0; i < solutions.length; ++i) {
+          s[i].empty();
+          solution = solutions[i];
+          for (y = 0; y < M; ++y) {
+            tr = $('<tr></tr>');
+            for (x = 0; x < N; ++x)
+              tr.append($('<td></td>').text(solution[x][y]));
+            s[i].append(tr);
+          }
+        }
+      });
       $('button#hint').click(function () {
         var i, f;
         for (i = 0; i < solution.length; ++i) {

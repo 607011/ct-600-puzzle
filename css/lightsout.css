@@ -60,6 +60,23 @@ html, body {
   display: block;
 }
 
+table.solution {
+  border-collapse: collapse;
+  margin: 10px;
+  background-color: #2f3233;
+  box-shadow: #2f3233 0px 0px 6px;
+  display: inline-block;
+}
+
+  table.solution td {
+    text-align: center;
+    border: 1px solid #111;
+    width: 1em;
+    height: 1em;
+    vertical-align: middle;
+    font-size: smaller;
+  }
+
 table#puzzle {
   border-collapse: collapse;
   margin: 10px auto;
