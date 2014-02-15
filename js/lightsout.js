@@ -202,17 +202,17 @@ var Solver = (function () {
     }
   }
   function solved() {
-    var j, x, y, solution, solutions = [], goal, anscols, value;
+    var i, j, x, y, solution, solutions = [], goal, anscols, value;
     for (goal = 0; goal < nStates; goal++) {
       solution = new Array(N);
-      for (x = 0; x < N; ++x)
-        solution[x] = new Array(M);
+      for (i = 0; i < N; ++i)
+        solution[i] = new Array(M);
       if (solvedProblem(goal)) {
         anscols = new Array();
-        for (j = 0; j < n; j++)
+        for (j = 0; j < n; ++j)
           anscols[cols[j]] = j;
-        for (x = 0; x < N; x++) {
-          for (y = 0; y < M; y++) {
+        for (x = 0; x < N; ++x) {
+          for (y = 0; y < M; ++y) {
             j = anscols[y * N + x];
             value = (j < r) ? a(j, n) : '';
             solution[x][y] = ([ ' ', 'x' ])[a(j, n)];
