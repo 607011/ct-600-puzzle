@@ -41,18 +41,16 @@ Number.prototype.factorial = function () {
 var Solver = (function () {
   "use strict";
   /// Original solver by Norio Kato, http://www.ueda.info.waseda.ac.jp/~n-kato/lightsout/ 
-  /// Modified by Oliver Lau <ola@ct.de>
-  var mat,    // integer[i][j]
-    cols,   // integer[]
-    m,      // count of rows of the matrix
-    n,      // count of columns of the matrix
-    np,     // count of columns of the enlarged matrix
-    r,      // minimum rank of the matrix
-    maxr,   // maximum rank of the matrix
-    nStates = 2,
-    colcount,
-    rowcount,
-    cells;  // integer[row][col], current states of tiles
+  /// Modified 2014 by Oliver Lau <ola@ct.de>
+  var mat,        // integer[i][j]
+    cols,         // integer[]
+    m,            // count of rows of the matrix
+    n,            // count of columns of the matrix
+    np,           // count of columns of the enlarged matrix
+    r,            // minimum rank of the matrix
+    maxr,         // maximum rank of the matrix
+    nStates = 2,  // number of states: 0 or 1
+    N, M, cells;  // integer[N][M], current states of tiles
 
   function a(i, j) {
     return mat[i][cols[j]];
@@ -63,7 +61,6 @@ var Solver = (function () {
   }
 
   function modulate(x) {
-    // returns z such that 0 <= z < nStates and x == z (mod nStates)
     if (x >= 0)
       return x % nStates;
     x = (-x) % nStates;
@@ -72,25 +69,24 @@ var Solver = (function () {
     return nStates - x;
   }
 
-  function gcd(x, y) { // call when: x >= 0 and y >= 0
+  function gcd(x, y) {
     if (y === 0)
       return x;
     if (x === y)
       return x;
     if (x > y)
-      x = x % y; // x < y
+      x = x % y;
     while (x > 0) {
-      y = y % x; // y < x
+      y = y % x;
       if (y === 0)
         return x;
-      x = x % y; // x < y
+      x = x % y;
     }
     return y;
   }
 
-  function invert(value) { // call when: 0 <= value < nStates
+  function invert(value) {
     var seed, a = 1, b = 0, c = 0, d = 1, x, y = nStates, tmp;
-    // returns z such that value * z == 1 (mod nStates), or 0 if no such z
     if (value <= 1)
       return value;
     x = value;
@@ -110,51 +106,51 @@ var Solver = (function () {
   }
 
   function initMatrix() {
-    var col, row, i, j, line;
+    var x, y, i, j, line;
     maxr = Math.min(m, n);
     mat = new Array();
-    for (col = 0; col < colcount; ++col)
-      for (row = 0; row < rowcount; ++row) {
-        i = row * colcount + col;
+    for (x = 0; x < N; ++x)
+      for (y = 0; y < M; ++y) {
+        i = y * N + x;
         line = new Array();
         mat[i] = line;
         for (j = 0; j < n; ++j)
           line[j] = 0;
         line[i] = 1;
-        if (col > 0)
+        if (x > 0)
           line[i - 1] = 1;
-        if (row > 0)
-          line[i - colcount] = 1;
-        if (col < colcount - 1)
+        if (y > 0)
+          line[i - N] = 1;
+        if (x < N - 1)
           line[i + 1] = 1;
-        if (row < rowcount - 1)
-          line[i + colcount] = 1;
+        if (y < M - 1)
+          line[i + N] = 1;
       }
     cols = new Array();
     for (j = 0; j < np; ++j)
       cols[j] = j;
   }
 
-  function solveProblem(goal) {
-    var size = colcount * rowcount, col, row;
+  function solvedProblem(goal) {
+    var size = N * M, x, y;
     m = size;
     n = size;
     np = n + 1;
     initMatrix();
-    for (col = 0; col < colcount; ++col)
-      for (row = 0; row < rowcount; ++row)
-        mat[row * colcount + col][n] = modulate(goal - cells[col][row]);
+    for (x = 0; x < N; ++x)
+      for (y = 0; y < M; ++y)
+        mat[y * N + x][n] = modulate(goal - cells[x][y]);
     return sweep();
   }
 
   function sweep() {
     for (r = 0; r < maxr; r++) {
       if (!sweepStep())
-        return false; // failed in founding a solution
+        return false;
       if (r === maxr)
         break;
     }
-    return true; // successfully found a solution
+    return true;
   }
 
   function sweepStep() {
@@ -173,15 +169,15 @@ var Solver = (function () {
         }
       }
     }
-    if (finished) { // we have: 0x = b (every matrix element is 0)
-      maxr = r;   // rank(A) == maxr
+    if (finished) {
+      maxr = r;
       for (j = n; j < np; ++j)
         for (i = r; i < m; ++i)
           if (a(i, j) != 0)
-            return false; // no solution since b != 0
-      return true;    // 0x = 0 has solutions including x = 0
+            return false;
+      return true;
     }
-    return false; // failed in finding a solution
+    return false;
   }
 
   function swap(array, x, y) {
@@ -206,20 +202,20 @@ var Solver = (function () {
     }
   }
   function solved() {
-    var j, col, row, solution, solutions = [], goal, anscols, value;
+    var j, x, y, solution, solutions = [], goal, anscols, value;
     for (goal = 0; goal < nStates; goal++) {
-      solution = new Array(colcount);
-      for (col = 0; col < colcount; ++col)
-        solution[col] = new Array(rowcount);
-      if (solveProblem(goal)) { // found an integer solution
+      solution = new Array(N);
+      for (x = 0; x < N; ++x)
+        solution[x] = new Array(M);
+      if (solvedProblem(goal)) {
         anscols = new Array();
         for (j = 0; j < n; j++)
           anscols[cols[j]] = j;
-        for (col = 0; col < colcount; col++) {
-          for (row = 0; row < rowcount; row++) {
-            j = anscols[row * colcount + col];
+        for (x = 0; x < N; x++) {
+          for (y = 0; y < M; y++) {
+            j = anscols[y * N + x];
             value = (j < r) ? a(j, n) : '';
-            solution[col][row] = ([ ' ', 'x' ])[a(j, n)];
+            solution[x][y] = ([ ' ', 'x' ])[a(j, n)];
           }
         }
         solutions.push(solution);
@@ -229,8 +225,8 @@ var Solver = (function () {
   }  return {
     solve: function (puzzle) {
       cells = puzzle;
-      colcount = cells.length;
-      rowcount = cells[0].length;
+      N = cells.length;
+      M = cells[0].length;
       return solved();
     }
   }
