@@ -215,7 +215,7 @@ var Solver = (function () {
           for (y = 0; y < M; ++y) {
             j = anscols[y * N + x];
             value = (j < r) ? a(j, n) : '';
-            solution[x][y] = ([ ' ', 'x' ])[a(j, n)];
+            solution[x][y] = a(j, n);
           }
         }
         solutions.push(solution);
@@ -441,7 +441,7 @@ var Solver = (function () {
         });
       }
       $('button#solve').click(function () {
-        var solution, solutions = Solver.solve(puzzle),
+        var solution, solutions = Solver.solve(puzzle), nSteps,
           s = [$('table#solution0'), $('table#solution1')],
           i, x, y, tr, td;
         for (i = 0; i < solutions.length; ++i) {
@@ -450,9 +450,11 @@ var Solver = (function () {
           for (y = 0; y < M; ++y) {
             tr = $('<tr></tr>');
             for (x = 0; x < N; ++x)
-              tr.append($('<td></td>').text(solution[x][y]));
+              tr.append($('<td></td>').text((['','X'])[solution[x][y]]));
             s[i].append(tr);
           }
+          nSteps = solution.reduce(function (prev, curr) { return prev.concat(curr); }).reduce(function(prev, curr, idx, arr) { return prev + curr; }, 0);
+          s[i].prepend($('<thead></thead>').append($('<tr></tr>').append($('<td></td>').attr('colspan', N).text(nSteps))));
         }
       });
       $('button#hint').click(function () {
