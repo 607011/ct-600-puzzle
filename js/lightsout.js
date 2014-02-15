@@ -416,9 +416,9 @@ var Solver = (function () {
 
   function preloadImages(callback) {
     var IMAGES = ['img/cover0-388.jpg', 'img/cover1-388.jpg', 'img/cover0-582.jpg', 'img/cover1-582.jpg'],
-      i, loaded = 0, N = IMAGES.length;
+      N = IMAGES.length, loaded = 0, img, i;
     for (i = 0; i < N; ++i) {
-      var img = new Image();
+      img = new Image();
       img.onload = function () {
         if (++loaded === N)
           callback.call();
