@@ -496,8 +496,51 @@ var Solver = (function () {
   }
 
 
-  function showSolution() {
-
+  function playSolution() {
+    var i = 0, solutions = Solver.solve(puzzle),
+      solution = solutions[0],
+      flips = (function() {
+        var x, y, moves = [];
+        for (y = 0; y < M; ++y) {
+          for (x = 0; x < N; ++x) {
+            if (solution[x][y] === 1)
+              moves.push({ x: x, y: y });
+          }
+        }
+        function shuffleArray(array) {
+          var i, j, temp;
+          for (i = array.length - 1; i > 0; --i) {
+            j = Math.floor(Math.random() * (i + 1));
+            temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+          }
+          return array;
+        }
+        return shuffleArray(moves);
+      })(),
+      makeTurn = function () {
+        if (i < flips.length) {
+          turn(flips[i].x, flips[i].y);
+          ++i;
+          setTimeout(makeTurn, 1000);
+        }
+        else {
+          $('button#solve').prop('disabled', false);
+          $('button#hint').prop('disabled', false);
+          $('button#new-game').prop('disabled', false);
+          $('#d-container').prop('disabled', false);
+          alert('Gar nicht so schwer, oder? ;-)');
+          newGame();
+        }
+      };
+    console.log(flips);
+    setTimeout(makeTurn, 250);
+    $('button#solve').prop('disabled', true);
+    $('button#hint').prop('disabled', true);
+    $('button#again').prop('disabled', true);
+    $('button#new-game').prop('disabled', true);
+    $('#d-container').prop('disabled', true);
   }
 
 
@@ -511,7 +554,7 @@ var Solver = (function () {
           opts[p[0]] = parseInt(p[1], 10);
         });
       }
-      $('button#solve').click(showSolution);
+      $('button#solve').click(playSolution);
       $('button#hint').click(solvePuzzle);
       $('button#again').click(restart).prop('disabled', true);
       $('button#new-game').click(function () { newGame(parseInt($('#d-container').val(), 10)) });
