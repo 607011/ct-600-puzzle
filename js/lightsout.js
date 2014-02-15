@@ -77,17 +77,18 @@ Number.prototype.factorial = function () {
   }
 
 
+  function allTheSame() {
+    var sample = puzzle[0][0], x, y;
+    for (x = 0; x < N; ++x)
+      for (y = 0; y < M; ++y)
+        if (puzzle[x][y] !== sample)
+          return false;
+    return true;
+  }
+
+
   function checkFinished() {
-    var fields = puzzle.reduce(
-      function (prev, current) {
-        return prev.concat(current);
-      }),
-      finished = fields.every(function (ele) {
-        return ele === 1;
-      }) || fields.every(function (ele) {
-        return ele === 0;
-      });
-    if (finished) {
+    if (allTheSame()) {
       alert('Juhuuu! Du hast das Puzzle mit ' + moves.length + ' Zügen gelöst!');
       newGame();
     }
