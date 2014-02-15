@@ -29,7 +29,6 @@ RNG.prototype.next = function () {
   this.X = (1664525 * this.X + 1013904223) % 4294967296;
   return this.X;
 };
-
 Number.prototype.factorial = function () {
   var x = 1, i;
   for (i = 2; i <= this; ++i)
@@ -243,6 +242,52 @@ var Solver = (function () {
       { d: 'schwer', n: 4, m: 5 },
       { d: 'extrem', n: 7, m: 10 }
     ],
+    indexesByValue = function (arr, v) {
+      return arr.reduce(function (prev, curr) { return prev.concat(curr); })
+        .map(function (curr, idx, arr) { return (curr === v) ? idx : null; })
+        .filter(function (val) { return val !== null; });
+    },
+    _middle = {
+      0: [
+        [1, 1, 1],
+        [1, 0, 1],
+        [1, 0, 1],
+        [1, 1, 1]
+      ],
+      1: [
+        [0, 0, 0, 0],
+        [1, 1, 1, 1],
+        [1, 0, 0, 1],
+        [1, 1, 1, 1],
+        [0, 0, 0, 0]
+      ],
+      2: [
+        [1, 1, 1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0, 0, 1],
+        [1, 1, 0, 0, 0, 1, 1],
+        [0, 1, 0, 1, 0, 1, 0],
+        [1, 1, 1, 0, 1, 1, 1],
+        [1, 1, 1, 0, 1, 1, 1],
+        [0, 1, 0, 1, 0, 1, 0],
+        [1, 1, 0, 0, 0, 1, 1],
+        [1, 0, 0, 0, 0, 0, 1],
+        [1, 1, 1, 1, 1, 1, 1]
+      ]
+    },
+    middle = {
+      0: {
+        0: indexesByValue(_middle[0], 0),
+        1: indexesByValue(_middle[0], 1)
+      },
+      1: {
+        0: indexesByValue(_middle[1], 0),
+        1: indexesByValue(_middle[1], 1)
+      },
+      2: {
+        0: indexesByValue(_middle[2], 0),
+        1: indexesByValue(_middle[2], 1)
+      }
+    },
     rng = new RNG(),
     puzzle, moves,
     solution, /* TODO: alles damit Zusammenhängende für Finalversion entfernen! */
@@ -369,23 +414,28 @@ var Solver = (function () {
 
 
   function initPuzzle() {
-    var f, x, y, i, selected;
+    var f, x, y, i, selected, ones, zeros, nOnes, nZeros;
     clearPuzzle();
     rng.seed(opts.game);
     $('#game-number').text(opts.game);
-    selected = [];
+    ones = middle[opts.difficulty][0].slice(0);
+    zeros = middle[opts.difficulty][1].slice(0);
+    // discard half of the ones
+    nOnes = ones.length / 2;
+    while (ones.length > nOnes)
+      ones.splice(rng.next() % ones.length, 1);
+    // discard zeros
+    nZeros = nTurns - nOnes;
+    while (zeros.length > nZeros)
+      zeros.splice(rng.next() % zeros.length, 1);
+    selected = ones.concat(zeros);
     solution = [];
-    i = nTurns;
-    while (i > 0) {
-      f = rng.next() % nFields;
-      if (selected.indexOf(f) < 0) {
-        selected.push(f);
-        x = f % N;
-        y = Math.floor(f / N);
-        turn(x, y);
-        solution.push({ x: x, y: y });
-        --i;
-      }
+    for (i = 0; i < selected.length; ++i) {
+      f = selected[i];
+      x = f % N;
+      y = Math.floor(f / N);
+      turn(x, y);
+      solution.push({ x: x, y: y });
     }
     drawPuzzle();
   }
@@ -407,6 +457,7 @@ var Solver = (function () {
     $('table#solution0').empty();
     $('table#solution1').empty();
     initPuzzle();
+    solvePuzzle();
   }
 
 
@@ -430,6 +481,25 @@ var Solver = (function () {
   }
 
 
+  function solvePuzzle() {
+    var solution, solutions = Solver.solve(puzzle), nSteps,
+      s = [$('table#solution0'), $('table#solution1')],
+      i, x, y, tr, td;
+    for (i = 0; i < solutions.length; ++i) {
+      s[i].empty();
+      solution = solutions[i];
+      for (y = 0; y < M; ++y) {
+        tr = $('<tr></tr>');
+        for (x = 0; x < N; ++x)
+          tr.append($('<td></td>').text((['', 'X'])[solution[x][y]]));
+        s[i].append(tr);
+      }
+      nSteps = solution.reduce(function (prev, curr) { return prev.concat(curr); }).reduce(function (prev, curr, idx, arr) { return prev + curr; }, 0);
+      s[i].prepend($('<thead></thead>').append($('<tr></tr>').append($('<td></td>').attr('colspan', N).text(nSteps))));
+    }
+  }
+
+
   function init() {
     preloadImages(function () {
       var p;
@@ -440,23 +510,7 @@ var Solver = (function () {
           opts[p[0]] = parseInt(p[1], 10);
         });
       }
-      $('button#solve').click(function () {
-        var solution, solutions = Solver.solve(puzzle), nSteps,
-          s = [$('table#solution0'), $('table#solution1')],
-          i, x, y, tr, td;
-        for (i = 0; i < solutions.length; ++i) {
-          s[i].empty();
-          solution = solutions[i];
-          for (y = 0; y < M; ++y) {
-            tr = $('<tr></tr>');
-            for (x = 0; x < N; ++x)
-              tr.append($('<td></td>').text((['','X'])[solution[x][y]]));
-            s[i].append(tr);
-          }
-          nSteps = solution.reduce(function (prev, curr) { return prev.concat(curr); }).reduce(function(prev, curr, idx, arr) { return prev + curr; }, 0);
-          s[i].prepend($('<thead></thead>').append($('<tr></tr>').append($('<td></td>').attr('colspan', N).text(nSteps))));
-        }
-      });
+      $('button#solve').click(solvePuzzle);
       $('button#hint').click(function () {
         var i, f;
         for (i = 0; i < solution.length; ++i) {
