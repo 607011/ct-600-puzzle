@@ -404,6 +404,8 @@ var Solver = (function () {
     $('#moves').text(0);
     $('button#again').prop('disabled', true);
     $('button#hint').prop('disabled', false);
+    $('table#solution0').empty();
+    $('table#solution1').empty();
     initPuzzle();
   }
 
