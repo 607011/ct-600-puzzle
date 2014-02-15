@@ -61,10 +61,12 @@ html, body {
 }
 
 table.solution {
+  position: absolute;
+  top: 5px;
   border-collapse: collapse;
   margin: 10px;
-  background-color: #2f3233;
-  box-shadow: #2f3233 0px 0px 6px;
+  background-color: rgba(47, 50, 51, 0.6);
+  box-shadow: rgba(47, 50, 51, 0.6) 0px 0px 6px;
   display: inline-block;
 }
 
@@ -76,6 +78,14 @@ table.solution {
     vertical-align: middle;
     font-size: smaller;
   }
+
+table#solution0 {
+  left: 5px;
+}
+
+table#solution1 {
+  right: 5px;
+}
 
 table#puzzle {
   border-collapse: collapse;
