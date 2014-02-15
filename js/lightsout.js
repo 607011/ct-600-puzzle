@@ -290,7 +290,6 @@ var Solver = (function () {
     },
     rng = new RNG(),
     puzzle, moves,
-    solution, /* TODO: alles damit Zusammenhängende für Finalversion entfernen! */
     N, M, nFields, nTurns, nCombinations;
 
 
@@ -429,13 +428,11 @@ var Solver = (function () {
     while (zeros.length > nZeros)
       zeros.splice(rng.next() % zeros.length, 1);
     selected = ones.concat(zeros);
-    solution = [];
     for (i = 0; i < selected.length; ++i) {
       f = selected[i];
       x = f % N;
       y = Math.floor(f / N);
       turn(x, y);
-      solution.push({ x: x, y: y });
     }
     drawPuzzle();
   }
@@ -457,7 +454,6 @@ var Solver = (function () {
     $('table#solution0').empty();
     $('table#solution1').empty();
     initPuzzle();
-    solvePuzzle();
   }
 
 
@@ -482,7 +478,7 @@ var Solver = (function () {
 
 
   function solvePuzzle() {
-    var solution, solutions = Solver.solve(puzzle), nSteps,
+    var solutions = Solver.solve(puzzle), solution, nSteps,
       s = [$('table#solution0'), $('table#solution1')],
       i, x, y, tr, td;
     for (i = 0; i < solutions.length; ++i) {
@@ -500,6 +496,11 @@ var Solver = (function () {
   }
 
 
+  function showSolution() {
+
+  }
+
+
   function init() {
     preloadImages(function () {
       var p;
@@ -510,15 +511,8 @@ var Solver = (function () {
           opts[p[0]] = parseInt(p[1], 10);
         });
       }
-      $('button#solve').click(solvePuzzle);
-      $('button#hint').click(function () {
-        var i, f;
-        for (i = 0; i < solution.length; ++i) {
-          f = solution[i];
-          $('#back-' + f.x + '-' + f.y).toggleClass('hint');
-          $('#front-' + f.x + '-' + f.y).toggleClass('hint');
-        }
-      });
+      $('button#solve').click(showSolution);
+      $('button#hint').click(solvePuzzle);
       $('button#again').click(restart).prop('disabled', true);
       $('button#new-game').click(function () { newGame(parseInt($('#d-container').val(), 10)) });
       newGame(
