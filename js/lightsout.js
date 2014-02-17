@@ -90,7 +90,8 @@ Number.prototype.factorial = function () {
       }
     ],
     Positions = ['front', 'back'],
-    States = ['old', 'new'],
+    nPositions = Positions.length,
+    States = ['state0', 'state1'],
     nStates = States.length,
     rng = new RNG(),
     puzzle, moves,
@@ -100,9 +101,9 @@ Number.prototype.factorial = function () {
   function flip(x, y) {
     var i, j, cell;
     puzzle[x][y] = (puzzle[x][y] + 1) % nStates;
-    for (i = 0; i < nStates; ++i) {
+    for (i = 0; i < nPositions; ++i) {
       cell = $('#' + Positions[i] + '-' + x + '-' + y);
-      for (j = 0; j < nStates; ++j)
+      for (j = 0; j < nPositions; ++j)
         cell.toggleClass(Positions[j]);
     }
   }
@@ -160,7 +161,7 @@ Number.prototype.factorial = function () {
         left = x * dw;
         top = y * dh;
         $('#cell-' + x + '-' + y).css('left', left + 'px').css('top', top + 'px');
-        for (i = 0; i < nStates; ++i)
+        for (i = 0; i < nPositions; ++i)
           $('#' + Positions[i] + '-' + x + '-' + y)
             .css('background-position', (-left) + 'px ' + (-top) + 'px');
       }
@@ -190,7 +191,7 @@ Number.prototype.factorial = function () {
           .attr('id', 'cell-' + x + '-' + y)
           .addClass('cell')
           .on('click', clickTile.bind(null, x, y));
-        for (i = 0; i < nStates; ++i) {
+        for (i = 0; i < nPositions; ++i) {
           cell.append($('<span></span>')
             .addClass('three-d')
             .attr('id', Positions[i] + '-' + x + '-' + y)
@@ -305,11 +306,13 @@ Number.prototype.factorial = function () {
       stopped = false,
       playTimerId = null,
       flips = (function() {
-        var x, y, moves = [];
+        var x, y, moves = [], n;
         for (y = 0; y < M; ++y)
-          for (x = 0; x < N; ++x)
-            if (solution[x][y] === 1)
+          for (x = 0; x < N; ++x) {
+            n = solution[x][y];
+            while (n-- > 0)
               moves.push({ x: x, y: y });
+          }
         return moves;
       })(),
       restoreButtons = function () {
@@ -357,7 +360,6 @@ Number.prototype.factorial = function () {
     $.each(difficulties, function (i, d) {
       $('#d-container').append($('<option></option>').attr('value', i).text(d.d));
     });
-    $('#d-container').val(opts.difficulty);
 
     preloadImages()
       .then(function () {
@@ -372,6 +374,7 @@ Number.prototype.factorial = function () {
           typeof opts.difficulty === 'number' ? Math.min(Math.max(opts.difficulty, 0), difficulties.length - 1) : 1,
           typeof opts.game === 'number' ? opts.game : undefined
         );
+        $('#d-container').val(opts.difficulty);
         $(window).resize(resize).trigger('resize');
       });
   }

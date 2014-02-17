@@ -128,12 +128,16 @@ table#solution1 {
   cursor: pointer;
 }
 
-  .three-d.old {
+  .three-d.state0 {
     background-image: url('../img/cover0-582.jpg');
   }
 
-  .three-d.new {
+  .three-d.state1 {
     background-image: url('../img/cover1-582.jpg');
+  }
+
+  .three-d.state2 {
+    background-image: url('../img/cover2-582.jpg');
   }
 
   .three-d.front {
@@ -340,12 +344,16 @@ dd {
     height: 388px;
   }
 
-  .three-d.old {
+  .three-d.state0 {
     background-image: url('../img/cover0-388.jpg');
   }
 
-  .three-d.new {
+  .three-d.state1 {
     background-image: url('../img/cover1-388.jpg');
+  }
+
+  .three-d.state2 {
+    background-image: url('../img/cover2-388.jpg');
   }
 
   footer {
