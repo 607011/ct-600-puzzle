@@ -170,7 +170,7 @@ Number.prototype.factorial = function () {
     $('#moves').text(moves.length);
     $('button#hint').prop('disabled', true);
     $('button#again').prop('disabled', false);
-    setTimeout(checkFinished, 450);
+    setTimeout(checkFinished, 250);
   }
 
 
