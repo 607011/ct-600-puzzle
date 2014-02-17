@@ -27,27 +27,29 @@ html, body {
   position: relative;
 }
 
-#moves {
-  display: inline-block;
-  min-width: 66px;
-}
-
-  #moves:before {
-    content: 'Züge: ';
-  }
-
 #info {
-  margin: 0 auto;
+  margin: 1ex auto 1ex auto;
   text-align: center;
   display: block;
 }
 
 #game-number {
   display: inline-block;
+  font-style: italic;
 }
 
   #game-number:before {
-    content: '#';
+    content: 'Spiel #';
+  }
+
+#moves {
+  display: inline-block;
+  min-width: 66px;
+  font-style: italic;
+}
+
+  #moves:before {
+    content: 'Züge: ';
   }
 
 #controls {
@@ -266,9 +268,10 @@ select {
   font-family: -apple-system-font, Helvetica, Arial, Verdana, sans-serif;
   font-size: 14px;
   height: 44px;
-  min-width: 66px;
   display: inline-block;
   background-color: #bfd2db;
+  vertical-align: bottom;
+  cursor: pointer;
 }
 
 body.readme {
