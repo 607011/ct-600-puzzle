@@ -91,7 +91,7 @@ Number.prototype.factorial = function () {
     ],
     rng = new RNG(),
     puzzle, moves,
-    N, M, nFields, nTurns, nCombinations;
+    N, M, nStates = 2, nFields, nTurns, nCombinations;
 
 
   function flip(x, y) {
@@ -292,36 +292,53 @@ Number.prototype.factorial = function () {
 
 
   function playSolution() {
-    var i = 0, solutions = Solver.solve(puzzle),
+    var i = 0,
+      solutions = Solver.solve(puzzle),
       solution = solutions[0],
+      stopped = false,
+      playTimerId = null,
       flips = (function() {
-        var x, y, moves = [];
-        for (y = 0; y < M; ++y) {
-          for (x = 0; x < N; ++x) {
-            if (solution[x][y] === 1)
+        var x, y, moves = [], col;
+        for (x = 0; x < N; ++x) {
+          col = solution[x];
+          for (y = 0; y < M; ++y)
+            if (col[y] === 1)
               moves.push({ x: x, y: y });
-          }
         }
         return moves;
       })(),
+      restoreButtons = function () {
+        $('button#solve').text('Lösen').off('click', stop).on('click', playSolution);
+        $('button#hint').prop('disabled', false);
+        $('button#new-game').prop('disabled', false);
+        $('#d-container').prop('disabled', false);
+      },
+      stop = function () {
+        if (playTimerId)
+          clearTimeout(playTimerId);
+        playTimerId = null;
+        stopped = true;
+        restoreButtons();
+      },
       makeTurn = function () {
+        if (stopped) {
+          if (playTimerId)
+            clearTimeout(playTimerId);
+          return;
+        }
         if (i < flips.length) {
           turn(flips[i].x, flips[i].y);
           ++i;
-          setTimeout(makeTurn, 1000);
+          playTimerId = setTimeout(makeTurn, 1000);
         }
         else {
-          $('button#solve').prop('disabled', false);
-          $('button#hint').prop('disabled', false);
-          $('button#new-game').prop('disabled', false);
-          $('#d-container').prop('disabled', false);
+          restoreButtons();
           alert('Gar nicht so schwer, oder? ;-)');
           newGame();
         }
       };
-    console.log(flips);
-    setTimeout(makeTurn, 250);
-    $('button#solve').prop('disabled', true);
+    playTimerId = setTimeout(makeTurn, 250);
+    $('button#solve').text('Stopp').off('click', playSolution).on('click', stop);
     $('button#hint').prop('disabled', true);
     $('button#again').prop('disabled', true);
     $('button#new-game').prop('disabled', true);
