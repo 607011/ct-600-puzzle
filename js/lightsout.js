@@ -47,7 +47,7 @@ Number.prototype.factorial = function () {
         [1, 0, 1],
         [1, 0, 1],
         [1, 1, 1]
-      ]  },
+      ] },
       {
         d: 'schwer', n: 4, m: 5, mid: [
         [0, 0, 0, 0],
@@ -89,15 +89,22 @@ Number.prototype.factorial = function () {
         1: indexesByValue(difficulties[2].mid, 1)
       }
     ],
+    Positions = ['front', 'back'],
+    States = ['old', 'new'],
+    nStates = States.length,
     rng = new RNG(),
     puzzle, moves,
-    N, M, nStates = 2, nFields, nTurns, nCombinations;
+    N, M, nFields, nTurns, nCombinations;
 
 
   function flip(x, y) {
-    puzzle[x][y] ^= 1;
-    $('#back-' + x + '-' + y).toggleClass('front').toggleClass('back');
-    $('#front-' + x + '-' + y).toggleClass('front').toggleClass('back');
+    var i, j, cell;
+    puzzle[x][y] = (puzzle[x][y] + 1) % nStates;
+    for (i = 0; i < nStates; ++i) {
+      cell = $('#' + Positions[i] + '-' + x + '-' + y);
+      for (j = 0; j < nStates; ++j)
+        cell.toggleClass(Positions[j]);
+    }
   }
 
 
@@ -131,7 +138,7 @@ Number.prototype.factorial = function () {
 
 
   function resize() {
-    var x, y, dw, dh, tw, th, persp, bgpos, cells = $('#puzzle .cell'), left, top;
+    var i, x, y, dw, dh, tw, th, persp, cells = $('#puzzle .cell'), left, top;
     if ($(window).width() >= 480) {
       dw = Math.floor(411 / N);
       dh = Math.floor(582 / M);
@@ -153,9 +160,9 @@ Number.prototype.factorial = function () {
         left = x * dw;
         top = y * dh;
         $('#cell-' + x + '-' + y).css('left', left + 'px').css('top', top + 'px');
-        bgpos = (-left) + 'px ' + (-top) + 'px';
-        $('#back-' + x + '-' + y).css('background-position', bgpos);
-        $('#front-' + x + '-' + y).css('background-position', bgpos);
+        for (i = 0; i < nStates; ++i)
+          $('#' + Positions[i] + '-' + x + '-' + y)
+            .css('background-position', (-left) + 'px ' + (-top) + 'px');
       }
     }
     $.each(['-moz-', '-ms-', '-webkit-', ''], function (i, prefix) {
@@ -175,24 +182,21 @@ Number.prototype.factorial = function () {
 
 
   function drawPuzzle() {
-    var x, y, p = $('#puzzle'), cell, fOld, fNew;
+    var x, y, i, p = $('#puzzle'), cell;
     p.empty();
     for (y = 0; y < M; ++y) {
       for (x = 0; x < N; ++x) {
-        fOld = $('<span></span>')
-          .attr('id', 'back-' + x + '-' + y)
-          .addClass('three-d back')
-          .addClass(puzzle[x][y] === 0 ? 'old' : 'new');
-        fNew = $('<span></span>')
-          .attr('id', 'front-' + x + '-' + y)
-          .addClass('three-d front')
-          .addClass(puzzle[x][y] === 1 ? 'old' : 'new');
         cell = $('<span></span>')
           .attr('id', 'cell-' + x + '-' + y)
           .addClass('cell')
-          .on('click', clickTile.bind(null, x, y))
-          .append(fOld)
-          .append(fNew);
+          .on('click', clickTile.bind(null, x, y));
+        for (i = 0; i < nStates; ++i) {
+          cell.append($('<span></span>')
+            .addClass('three-d')
+            .attr('id', Positions[i] + '-' + x + '-' + y)
+            .addClass(Positions[i])
+            .addClass(States[(puzzle[x][y] + i) % nStates]));
+        }
         p.append(cell);
       }
     }
@@ -301,7 +305,7 @@ Number.prototype.factorial = function () {
       stopped = false,
       playTimerId = null,
       flips = (function() {
-        var x, y, moves = [], col;
+        var x, y, moves = [];
         for (y = 0; y < M; ++y)
           for (x = 0; x < N; ++x)
             if (solution[x][y] === 1)
@@ -315,18 +319,12 @@ Number.prototype.factorial = function () {
         $('#d-container').prop('disabled', false);
       },
       stop = function () {
-        if (playTimerId)
-          clearTimeout(playTimerId);
-        playTimerId = null;
         stopped = true;
         restoreButtons();
       },
       makeTurn = function () {
-        if (stopped) {
-          if (playTimerId)
-            clearTimeout(playTimerId);
+        if (stopped)
           return;
-        }
         if (i < flips.length) {
           turn(flips[i].x, flips[i].y);
           ++i;
@@ -367,8 +365,7 @@ Number.prototype.factorial = function () {
         $('button#hint').on('click', solvePuzzle);
         $('button#again').on('click', restart).prop('disabled', true);
         $('#d-container').on('change', function () {
-          var difficulty = parseInt($('#d-container').val(), 10);
-          newGame(difficulty);
+          newGame(parseInt($('#d-container').val(), 10));
         });
         $('button#new-game').on('click', function () { newGame(parseInt($('#d-container').val(), 10)) });
         newGame(
@@ -377,7 +374,6 @@ Number.prototype.factorial = function () {
         );
         $(window).resize(resize).trigger('resize');
       });
-
   }
 
 

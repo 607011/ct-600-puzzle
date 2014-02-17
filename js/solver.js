@@ -163,7 +163,7 @@ var Solver = (function () {
   }
   function solved() {
     var i, j, x, y, solution, solutions = [], goal, anscols;
-    for (goal = 0; goal < nStates; goal++) {
+    for (goal = 0; goal < nStates; ++goal) {
       solution = new Array(N);
       for (i = 0; i < N; ++i)
         solution[i] = new Array(M);
