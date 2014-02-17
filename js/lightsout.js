@@ -302,12 +302,10 @@ Number.prototype.factorial = function () {
       playTimerId = null,
       flips = (function() {
         var x, y, moves = [], col;
-        for (x = 0; x < N; ++x) {
-          col = solution[x];
-          for (y = 0; y < M; ++y)
-            if (col[y] === 1)
+        for (y = 0; y < M; ++y) 
+          for (x = 0; x < N; ++x)
+            if (puzzle[x][y] === 1)
               moves.push({ x: x, y: y });
-        }
         return moves;
       })(),
       restoreButtons = function () {
