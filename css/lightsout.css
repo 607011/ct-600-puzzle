@@ -21,14 +21,10 @@ html, body {
   color: #f0f0f0;
 }
 
-#puzzle-container {
+#main {
   display: block;
   padding: 10px 0;
   position: relative;
-}
-
-#puzzle-container h1 {
-  text-align: center;
 }
 
 #moves {
@@ -36,9 +32,9 @@ html, body {
   min-width: 66px;
 }
 
-#moves:before {
-  content: 'Züge: ';
-}
+  #moves:before {
+    content: 'Züge: ';
+  }
 
 #info {
   margin: 0 auto;
@@ -50,9 +46,9 @@ html, body {
   display: inline-block;
 }
 
-#game-number:before,  #game-number:after {
-  content: '#';
-}
+  #game-number:before {
+    content: '#';
+  }
 
 #controls {
   margin: 0 auto;
@@ -87,60 +83,55 @@ table#solution1 {
   right: 5px;
 }
 
-table#puzzle {
+#puzzle {
   border-collapse: collapse;
   margin: 10px auto;
-  border: 1px solid #2f3233;
   background-color: #2f3233;
   box-shadow: #2f3233 0px 0px 6px;
+  position: relative;
 }
 
-  table#puzzle td {
-    text-align: center;
-    cursor: pointer;
-    padding: 0;
-    -webkit-transform-style: preserve-3d;
-    transform-style: preserve-3d;
-    -moz-perspective: 300px;
-    -ms-perspective: 300px;
-    -webkit-perspective: 300px;
-    perspective: 300px;
-    -moz-perspective-origin: center center;
-    -ms-perspective-origin: center center;
-    -webkit-perspective-origin: center center;
-    perspective-origin: center center;
-    -moz-transform-origin: center center;
-    -ms-transform-origin: center center;
-    -o-transform-origin: center center;
-    -webkit-transform-origin: center center;
-    transform-origin: center center;
-    position: relative;
-  }
+.cell {
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  -moz-perspective: 300px;
+  -ms-perspective: 300px;
+  -webkit-perspective: 300px;
+  perspective: 300px;
+  -moz-perspective-origin: 50% 50%;
+  -ms-perspective-origin: 50% 50%;
+  -webkit-perspective-origin: 50% 50%;
+  perspective-origin: 50% 50%;
+  -moz-transform-origin: 50% 50%;
+  -ms-transform-origin: 50% 50%;
+  -o-transform-origin: 50% 50%;
+  -webkit-transform-origin: 50% 50%;
+  transform-origin: 50% 50%;
+  position: absolute;
+  cursor: pointer;
+  display: inline-block;
+}
 
-  table#puzzle .hint {
-    opacity: 0.5;
-  }
+.three-d {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: inline-block;
+  -moz-backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  background-repeat: no-repeat;
+}
 
-  table#puzzle td > span.three-d {
-    position: absolute;
-    top: 0;
-    left: 0;
-    display: inline-block;
-    -moz-backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-    background-repeat: no-repeat;
-  }
-
-  table#puzzle td .three-d.old {
+  .three-d.old {
     background-image: url('../img/cover0-582.jpg');
   }
 
-  table#puzzle td .three-d.new {
+  .three-d.new {
     background-image: url('../img/cover1-582.jpg');
   }
 
-  table#puzzle td .three-d.front {
+  .three-d.front {
     -moz-animation: spin-to-back ease-in-out 0.5s forwards;
     -o-animation: spin-to-back ease-in-out 0.5s forwards;
     -webkit-animation: spin-to-back ease-in-out 0.5s forwards;
@@ -152,7 +143,7 @@ table#puzzle {
     transform: rotateY(0deg);
   }
 
-  table#puzzle td .three-d.back {
+  .three-d.back {
     -moz-animation: spin-to-front ease-in-out 0.5s forwards;
     -o-animation: spin-to-front ease-in-out 0.5s forwards;
     -webkit-animation: spin-to-front ease-in-out 0.5s forwards;
@@ -315,6 +306,7 @@ dl {
 dt {
   font-weight: bold;
 }
+
 dd {
   padding-left: 1em;
 }
@@ -324,11 +316,11 @@ dd {
     font-size: 14px;
   }
 
-  table#puzzle td .three-d.old {
+  .three-d.old {
     background-image: url('../img/cover0-388.jpg');
   }
 
-  table#puzzle td .three-d.new {
+  .three-d.new {
     background-image: url('../img/cover1-388.jpg');
   }
 

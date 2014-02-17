@@ -131,31 +131,35 @@ Number.prototype.factorial = function () {
 
 
   function resize() {
-    var x, y, dw, dh, tw, th, persp, bgpos, cells = $('table#puzzle td');
+    var x, y, dw, dh, tw, th, persp, bgpos, cells = $('#puzzle .cell'), left, top;
     if ($(window).width() >= 480) {
-      dw = 411 / N;
-      dh = 582 / M;
+      dw = Math.floor(411 / N);
+      dh = Math.floor(582 / M);
       persp = 2;
     }
     else {
-      dw = 274 / N;
-      dh = 388 / M;
+      dw = Math.floor(274 / N);
+      dh = Math.floor(388 / M);
       persp = 3;
     }
-    tw = Math.floor(dw) + 'px';
-    th = Math.floor(dh) + 'px';
+    $('#puzzle').width((dw * N) + 'px').height((dh * M) + 'px');
+    tw = dw + 'px';
+    th = dh + 'px';
     $('.front').css('width', tw).css('height', th);
     $('.back').css('width', tw).css('height', th);
     cells.css('width', tw).css('height', th);
     for (y = 0; y < M; ++y) {
       for (x = 0; x < N; ++x) {
-        bgpos = Math.floor(-x * dw) + 'px ' + Math.floor(-y * dh) + 'px';
+        left = x * dw;
+        top = y * dh;
+        $('#cell-' + x + '-' + y).css('left', left + 'px').css('top', top + 'px');
+        bgpos = (-left) + 'px ' + (-top) + 'px';
         $('#back-' + x + '-' + y).css('background-position', bgpos);
         $('#front-' + x + '-' + y).css('background-position', bgpos);
       }
     }
     $.each(['-moz-', '-ms-', '-webkit-', ''], function (i, prefix) {
-      cells.css(prefix + 'perspective', Math.floor(persp * dw) + 'px');
+      cells.css(prefix + 'perspective', Math.round(persp * dw) + 'px');
     });
   }
 
@@ -171,10 +175,9 @@ Number.prototype.factorial = function () {
 
 
   function drawPuzzle() {
-    var x, y, p = $('table#puzzle'), tr, td, fOld, fNew;
+    var x, y, p = $('#puzzle'), cell, fOld, fNew;
     p.empty();
     for (y = 0; y < M; ++y) {
-      tr = $('<tr></tr>');
       for (x = 0; x < N; ++x) {
         fOld = $('<span></span>')
           .attr('id', 'back-' + x + '-' + y)
@@ -184,13 +187,14 @@ Number.prototype.factorial = function () {
           .attr('id', 'front-' + x + '-' + y)
           .addClass('three-d front')
           .addClass(puzzle[x][y] === 1 ? 'old' : 'new');
-        td = $('<td></td>')
+        cell = $('<span></span>')
+          .attr('id', 'cell-' + x + '-' + y)
+          .addClass('cell')
           .on('click', clickTile.bind(null, x, y))
           .append(fOld)
           .append(fNew);
-        tr.append(td);
+        p.append(cell);
       }
-      p.append(tr);
     }
     resize();
   }
