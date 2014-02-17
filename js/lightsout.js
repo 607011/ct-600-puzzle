@@ -302,9 +302,9 @@ Number.prototype.factorial = function () {
       playTimerId = null,
       flips = (function() {
         var x, y, moves = [], col;
-        for (y = 0; y < M; ++y) 
+        for (y = 0; y < M; ++y)
           for (x = 0; x < N; ++x)
-            if (puzzle[x][y] === 1)
+            if (solution[x][y] === 1)
               moves.push({ x: x, y: y });
         return moves;
       })(),
