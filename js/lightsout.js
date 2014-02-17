@@ -212,7 +212,7 @@ Number.prototype.factorial = function () {
 
 
   function initPuzzle() {
-    var f, x, y, i, selected, ones, zeros, nOnes, nZeros;
+    var i, f, selected, ones, zeros, nOnes, nZeros;
     clearPuzzle();
     rng.seed(opts.game);
     $('#game-number').text(opts.game);
@@ -229,9 +229,7 @@ Number.prototype.factorial = function () {
     selected = ones.concat(zeros);
     for (i = 0; i < selected.length; ++i) {
       f = selected[i];
-      x = f % N;
-      y = Math.floor(f / N);
-      turn(x, y);
+      turn(f % N,  Math.floor(f / N));
     }
     drawPuzzle();
   }

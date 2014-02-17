@@ -123,6 +123,7 @@ table#solution1 {
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   background-repeat: no-repeat;
+  cursor: pointer;
 }
 
   .three-d.old {
