@@ -89,9 +89,9 @@ Number.prototype.factorial = function () {
         1: indexesByValue(difficulties[2].mid, 1)
       }
     ],
-    Positions = ['front', 'back'],
+    Positions = ['pos0', 'pos1', 'pos2'],
     nPositions = Positions.length,
-    States = ['state0', 'state1'],
+    States = ['state0', 'state1', 'state2'],
     nStates = States.length,
     rng = new RNG(),
     puzzle, moves,
@@ -153,8 +153,8 @@ Number.prototype.factorial = function () {
     $('#puzzle').width((dw * N) + 'px').height((dh * M) + 'px');
     tw = dw + 'px';
     th = dh + 'px';
-    $('.front').css('width', tw).css('height', th);
-    $('.back').css('width', tw).css('height', th);
+    for (i = 0; i < nPositions; ++i)
+      $('.' + Positions[i]).css('width', tw).css('height', th);
     cells.css('width', tw).css('height', th);
     for (y = 0; y < M; ++y) {
       for (x = 0; x < N; ++x) {
@@ -281,7 +281,7 @@ Number.prototype.factorial = function () {
 
 
   function solvePuzzle() {
-    var solutions = Solver.solve(puzzle), solution, nSteps,
+    var solutions = Solver.solve(puzzle, nStates), solution, nSteps,
       s = [$('table#solution0'), $('table#solution1')],
       i, x, y, tr, td;
     for (i = 0; i < solutions.length; ++i) {

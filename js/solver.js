@@ -182,10 +182,11 @@ var Solver = (function () {
     }
     return solutions;
   }  return {
-    solve: function (puzzle) {
+    solve: function (puzzle, states) {
       cells = puzzle;
       N = cells.length;
       M = cells[0].length;
+      nStates = states;
       return solved();
     }
   }
