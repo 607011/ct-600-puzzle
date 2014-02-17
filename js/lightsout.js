@@ -238,30 +238,22 @@ var Solver = (function () {
 
   var opts = { game: null, difficulty: null },
     difficulties = [
-      { d: 'leicht', n: 3, m: 4 },
-      { d: 'schwer', n: 4, m: 5 },
-      { d: 'extrem', n: 7, m: 10 }
-    ],
-    indexesByValue = function (arr, v) {
-      return arr.reduce(function (prev, curr) { return prev.concat(curr); })
-        .map(function (curr, idx, arr) { return (curr === v) ? idx : null; })
-        .filter(function (val) { return val !== null; });
-    },
-    _middle = {
-      0: [
+      { d: 'leicht', n: 3, m: 4, mid: [
         [1, 1, 1],
         [1, 0, 1],
         [1, 0, 1],
         [1, 1, 1]
-      ],
-      1: [
+      ]  },
+      {
+        d: 'schwer', n: 4, m: 5, mid: [
         [0, 0, 0, 0],
         [1, 1, 1, 1],
         [1, 0, 0, 1],
         [1, 1, 1, 1],
         [0, 0, 0, 0]
-      ],
-      2: [
+      ] },
+      {
+        d: 'extrem', n: 7, m: 10, mid: [
         [1, 1, 1, 1, 1, 1, 1],
         [1, 0, 0, 0, 0, 0, 1],
         [1, 1, 0, 0, 0, 1, 1],
@@ -272,22 +264,27 @@ var Solver = (function () {
         [1, 1, 0, 0, 0, 1, 1],
         [1, 0, 0, 0, 0, 0, 1],
         [1, 1, 1, 1, 1, 1, 1]
-      ]
+      ] }
+    ],
+    indexesByValue = function (arr, v) {
+      return arr.reduce(function (prev, curr) { return prev.concat(curr); })
+        .map(function (curr, idx, arr) { return (curr === v) ? idx : null; })
+        .filter(function (val) { return val !== null; });
     },
-    middle = {
-      0: {
-        0: indexesByValue(_middle[0], 0),
-        1: indexesByValue(_middle[0], 1)
+    middle = [
+      {
+        0: indexesByValue(difficulties[0].mid, 0),
+        1: indexesByValue(difficulties[0].mid, 1)
       },
-      1: {
-        0: indexesByValue(_middle[1], 0),
-        1: indexesByValue(_middle[1], 1)
+      {
+        0: indexesByValue(difficulties[1].mid, 0),
+        1: indexesByValue(difficulties[1].mid, 1)
       },
-      2: {
-        0: indexesByValue(_middle[2], 0),
-        1: indexesByValue(_middle[2], 1)
+      {
+        0: indexesByValue(difficulties[2].mid, 0),
+        1: indexesByValue(difficulties[2].mid, 1)
       }
-    },
+    ],
     rng = new RNG(),
     puzzle, moves,
     N, M, nFields, nTurns, nCombinations;
@@ -301,28 +298,22 @@ var Solver = (function () {
 
 
   function turn(x, y) {
-    var above = y - 1,
-      below = y + 1,
-      left = x - 1,
-      right = x + 1;
     flip(x, y);
-    if (above >= 0)
-      flip(x, above);
-    if (below < M)
-      flip(x, below);
-    if (left >= 0)
-      flip(left, y);
-    if (right < N)
-      flip(right, y);
+    if (y > 0)     flip(x, y - 1);
+    if (y + 1 < M) flip(x, y + 1);
+    if (x > 0)     flip(x - 1, y);
+    if (x + 1 < N) flip(x + 1, y);
   }
 
 
   function allTheSame() {
-    var sample = puzzle[0][0], x, y;
-    for (x = 0; x < N; ++x)
+    var sample = puzzle[0][0], x, y, col;
+    for (x = 0; x < N; ++x) {
+      col = puzzle[x];
       for (y = 0; y < M; ++y)
-        if (puzzle[x][y] !== sample)
+        if (col[y] !== sample)
           return false;
+    }
     return true;
   }
 
@@ -417,8 +408,8 @@ var Solver = (function () {
     clearPuzzle();
     rng.seed(opts.game);
     $('#game-number').text(opts.game);
-    ones = middle[opts.difficulty][0].slice(0);
-    zeros = middle[opts.difficulty][1].slice(0);
+    ones = middle[opts.difficulty][0].slice(0);  // clone
+    zeros = middle[opts.difficulty][1].slice(0); // clone
     // discard half of the ones
     nOnes = ones.length / 2;
     while (ones.length > nOnes)
