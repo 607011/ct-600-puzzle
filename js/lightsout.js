@@ -262,17 +262,18 @@ Number.prototype.factorial = function () {
   }
 
 
-  function preloadImages(callback) {
+  function preloadImages() {
     var IMAGES = ['img/cover0-388.jpg', 'img/cover1-388.jpg', 'img/cover0-582.jpg', 'img/cover1-582.jpg'],
-      N = IMAGES.length, loaded = 0, img, i;
+      N = IMAGES.length, loaded = 0, img, i, promise = $.Deferred();
     for (i = 0; i < N; ++i) {
       img = new Image();
       img.onload = function () {
         if (++loaded === N)
-          callback.call();
+          promise.resolve();
       }
       img.src = IMAGES[i];
     }
+    return promise;
   }
 
 
@@ -351,32 +352,33 @@ Number.prototype.factorial = function () {
 
 
   function init() {
-    preloadImages(function () {
-      var p;
-      if (document.location.hash.length > 1) {
-        p = document.location.hash.substring(1).split(';');
-        $.each(p, function (i, d) {
-          var p = d.split('=');
-          opts[p[0]] = parseInt(p[1], 10);
-        });
-      }
-      $('button#solve').on('click', playSolution);
-      $('button#hint').on('click', solvePuzzle);
-      $('button#again').on('click', restart).prop('disabled', true);
-      $('button#new-game').on('click', function () { newGame(parseInt($('#d-container').val(), 10)) });
-      newGame(
-        typeof opts.difficulty === 'number' ? Math.min(Math.max(opts.difficulty, 0), difficulties.length - 1) : 1,
-        typeof opts.game === 'number' ? opts.game : undefined
-      );
-      $.each(difficulties, function (i, d) {
-        $('#d-container').append($('<option></option>').attr('value', i).text(d.d));
+    var p;
+    if (document.location.hash.length > 1) {
+      p = document.location.hash.substring(1).split(';');
+      $.each(p, function (i, d) {
+        var p = d.split('=');
+        opts[p[0]] = parseInt(p[1], 10);
       });
-      $('#d-container').change(function () {
-        var difficulty = parseInt($('#d-container').val(), 10);
-        newGame(difficulty);
-      }).val(opts.difficulty);
-      $(window).resize(resize).trigger('resize');
-    });
+    }
+    preloadImages()
+      .then(function () {
+        $('button#solve').on('click', playSolution);
+        $('button#hint').on('click', solvePuzzle);
+        $('button#again').on('click', restart).prop('disabled', true);
+        $('button#new-game').on('click', function () { newGame(parseInt($('#d-container').val(), 10)) });
+        newGame(
+          typeof opts.difficulty === 'number' ? Math.min(Math.max(opts.difficulty, 0), difficulties.length - 1) : 1,
+          typeof opts.game === 'number' ? opts.game : undefined
+        );
+        $.each(difficulties, function (i, d) {
+          $('#d-container').append($('<option></option>').attr('value', i).text(d.d));
+        });
+        $('#d-container').change(function () {
+          var difficulty = parseInt($('#d-container').val(), 10);
+          newGame(difficulty);
+        }).val(opts.difficulty);
+        $(window).resize(resize).trigger('resize');
+      });
   }
 
 
