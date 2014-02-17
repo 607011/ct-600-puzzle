@@ -162,7 +162,7 @@ var Solver = (function () {
     }
   }
   function solved() {
-    var i, j, x, y, solution, solutions = [], goal, anscols, value;
+    var i, j, x, y, solution, solutions = [], goal, anscols;
     for (goal = 0; goal < nStates; goal++) {
       solution = new Array(N);
       for (i = 0; i < N; ++i)
@@ -174,7 +174,6 @@ var Solver = (function () {
         for (x = 0; x < N; ++x) {
           for (y = 0; y < M; ++y) {
             j = anscols[y * N + x];
-            value = (j < r) ? a(j, n) : '';
             solution[x][y] = a(j, n);
           }
         }

@@ -185,7 +185,7 @@ Number.prototype.factorial = function () {
           .addClass('three-d front')
           .addClass(puzzle[x][y] === 1 ? 'old' : 'new');
         td = $('<td></td>')
-          .click(clickTile.bind(null, x, y))
+          .on('click', clickTile.bind(null, x, y))
           .append(fOld)
           .append(fNew);
         tr.append(td);
@@ -356,10 +356,10 @@ Number.prototype.factorial = function () {
           opts[p[0]] = parseInt(p[1], 10);
         });
       }
-      $('button#solve').click(playSolution);
-      $('button#hint').click(solvePuzzle);
-      $('button#again').click(restart).prop('disabled', true);
-      $('button#new-game').click(function () { newGame(parseInt($('#d-container').val(), 10)) });
+      $('button#solve').on('click', playSolution);
+      $('button#hint').on('click', solvePuzzle);
+      $('button#again').on('click', restart).prop('disabled', true);
+      $('button#new-game').on('click', function () { newGame(parseInt($('#d-container').val(), 10)) });
       newGame(
         typeof opts.difficulty === 'number' ? Math.min(Math.max(opts.difficulty, 0), difficulties.length - 1) : 1,
         typeof opts.game === 'number' ? opts.game : undefined
