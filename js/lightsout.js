@@ -23,12 +23,16 @@ Number.prototype.factorial = function () {
   return x;
 };
 
+Number.prototype.clamp = function (lo, hi) {
+  return Math.min(Math.max(this, lo), hi);
+};
 
 (function () {
   "use strict";
   var RNG = function (seed) {
     this.seed(seed || Date.now());
   };
+  RNG.MAX_VALUE = 4294967296;
   RNG.prototype.seed = function (seed) {
     if (typeof seed !== 'number')
       throw new TypeError('Parameter `seed` must be a number');
@@ -36,11 +40,21 @@ Number.prototype.factorial = function () {
   };
   RNG.prototype.next = function () {
     // LCG from the book 'Numerical Recipes'
-    this.X = (1664525 * this.X + 1013904223) % 4294967296;
+    this.X = (1664525 * this.X + 1013904223) % RNG.MAX_VALUE;
     return this.X;
   };
 
-  var opts = { game: null, difficulty: null },
+  var opts = { game: null, difficulty: null, n: 2 },
+    MAX_STATES = 6,
+    IMAGES = (function () {
+      var images = [], i = opts.n;
+      while (i--) {
+        images.push('img/cover' + i + '-582.jpg');
+        images.push('img/cover' + i + '-388.jpg');
+      }
+      return images;
+    })(),
+    // TODO: Berechnen von `difficulties` anhand von `opts.n`
     difficulties = [
       { d: 'leicht', n: 3, m: 4, mid: [
         [1, 1, 1],
@@ -75,6 +89,7 @@ Number.prototype.factorial = function () {
         .map(function (curr, idx, arr) { return (curr === v) ? idx : null; })
         .filter(function (val) { return val !== null; });
     },
+    // TODO: Berechnen von `middle` anhand von `opts.n`
     middle = [
       {
         0: indexesByValue(difficulties[0].mid, 0),
@@ -89,22 +104,21 @@ Number.prototype.factorial = function () {
         1: indexesByValue(difficulties[2].mid, 1)
       }
     ],
-    Positions = ['front', 'back'],
-    nPositions = Positions.length,
-    States = ['state0', 'state1'],
-    nStates = States.length,
     rng = new RNG(),
     puzzle, moves,
-    N, M, nFields, nTurns, nCombinations;
+    N, M, nFields, nTurns, nCombinations,
+    cellW, cellH;
 
 
   function flip(x, y) {
-    var i, j, cell;
-    puzzle[x][y] = (puzzle[x][y] + 1) % nStates;
-    for (i = 0; i < nPositions; ++i) {
-      cell = $('#' + Positions[i] + '-' + x + '-' + y);
-      for (j = 0; j < nPositions; ++j)
-        cell.toggleClass(Positions[j]);
+    var i, j, cell, m;
+    puzzle[x][y] = (puzzle[x][y] + 1) % opts.n;
+    for (i = 0; i < opts.n; ++i) {
+      cell = $('#pos' + i + '-' + x + '-' + y);
+      if (cell.length === 0)
+        continue;
+      m = cell.attr('class').match(/pos(\d+)/);
+      cell.addClass('pos' + ((parseInt(m[1], 10) + 1) % opts.n)).removeClass(m[0]);
     }
   }
 
@@ -139,35 +153,35 @@ Number.prototype.factorial = function () {
 
 
   function resize() {
-    var i, x, y, dw, dh, tw, th, persp, cells = $('#puzzle .cell'), left, top;
+    var i, x, y, tw, th, persp, cells = $('#puzzle .cell'), left, top;
     if ($(window).width() >= 480) {
-      dw = Math.floor(411 / N);
-      dh = Math.floor(582 / M);
+      cellW = Math.floor(411 / N);
+      cellH = Math.floor(582 / M);
       persp = 2;
     }
     else {
-      dw = Math.floor(274 / N);
-      dh = Math.floor(388 / M);
+      cellW = Math.floor(274 / N);
+      cellH = Math.floor(388 / M);
       persp = 3;
     }
-    $('#puzzle').width((dw * N) + 'px').height((dh * M) + 'px');
-    tw = dw + 'px';
-    th = dh + 'px';
-    $('.front').css('width', tw).css('height', th);
-    $('.back').css('width', tw).css('height', th);
+    $('#puzzle').width((cellW * N) + 'px').height((cellH * M) + 'px');
+    tw = cellW + 'px';
+    th = cellH + 'px';
+    for (i = 0; i < opts.n; ++i)
+      $('.pos' + i).css('width', tw).css('height', th);
     cells.css('width', tw).css('height', th);
     for (y = 0; y < M; ++y) {
       for (x = 0; x < N; ++x) {
-        left = x * dw;
-        top = y * dh;
+        left = x * cellW;
+        top = y * cellH;
         $('#cell-' + x + '-' + y).css('left', left + 'px').css('top', top + 'px');
-        for (i = 0; i < nPositions; ++i)
-          $('#' + Positions[i] + '-' + x + '-' + y)
+        for (i = 0; i < opts.n; ++i)
+          $('#pos' + i + '-' + x + '-' + y)
             .css('background-position', (-left) + 'px ' + (-top) + 'px');
       }
     }
     $.each(['-moz-', '-ms-', '-webkit-', ''], function (i, prefix) {
-      cells.css(prefix + 'perspective', Math.round(persp * dw) + 'px');
+      cells.css(prefix + 'perspective', Math.round(persp * cellW) + 'px');
     });
   }
 
@@ -176,8 +190,8 @@ Number.prototype.factorial = function () {
     turn(x, y);
     moves.push({ x: x, y: y });
     $('#moves').text(moves.length);
-    $('button#hint').prop('disabled', true);
-    $('button#again').prop('disabled', false);
+    $('#hint').prop('disabled', true);
+    $('#again').prop('disabled', false);
     setTimeout(checkFinished, 250);
   }
 
@@ -191,12 +205,12 @@ Number.prototype.factorial = function () {
           .attr('id', 'cell-' + x + '-' + y)
           .addClass('cell')
           .on('click', clickTile.bind(null, x, y));
-        for (i = 0; i < nPositions; ++i) {
+        for (i = 0; i < opts.n; ++i) {
           cell.append($('<span></span>')
             .addClass('three-d')
-            .attr('id', Positions[i] + '-' + x + '-' + y)
-            .addClass(Positions[i])
-            .addClass(States[(puzzle[x][y] + i) % nStates]));
+            .attr('id', 'pos' + i + '-' + x + '-' + y)
+            .addClass('pos' + i)
+            .addClass('state' + (puzzle[x][y] + i) % opts.n));
         }
         p.append(cell);
       }
@@ -221,6 +235,7 @@ Number.prototype.factorial = function () {
     clearPuzzle();
     rng.seed(opts.game);
     $('#game-number').text(opts.game);
+    // TODO: Berechnen des Startzustandes anhand von `opts.n`
     ones = middle[opts.difficulty][0].slice(0);  // clone
     zeros = middle[opts.difficulty][1].slice(0); // clone
     // discard half of the ones
@@ -241,20 +256,21 @@ Number.prototype.factorial = function () {
 
 
   function newGame(difficulty, num) {
+    var i = opts.n;
+    while (i--)
+      $('#solution' + i).empty();
     opts.difficulty = (typeof difficulty === 'number') ? difficulty : opts.difficulty;
     N = difficulties[opts.difficulty].n;
     M = difficulties[opts.difficulty].m;
     nFields = N * M;
     nTurns = nFields / 2;
     nCombinations = nFields.factorial() / (nTurns.factorial() * (nFields - nTurns).factorial());
-    opts.game = Math.max(0, Math.min(typeof num === 'number' ? num : Math.floor(Math.random() * nCombinations % 4294967296), 4294967296));
+    opts.game = Math.max(0, Math.min(typeof num === 'number' ? num : Math.floor(Math.random() * nCombinations % RNG.MAX_VALUE), RNG.MAX_VALUE));
     document.location.hash = $.map(opts, function (value, key) { return key + '=' + value; }).join(';');
     moves = [];
     $('#moves').text(0);
-    $('button#again').prop('disabled', true);
-    $('button#hint').prop('disabled', false);
-    $('table#solution0').empty();
-    $('table#solution1').empty();
+    $('#again').prop('disabled', true);
+    $('#hint').prop('disabled', false);
     initPuzzle();
   }
 
@@ -266,9 +282,9 @@ Number.prototype.factorial = function () {
 
 
   function preloadImages() {
-    var IMAGES = ['img/cover0-388.jpg', 'img/cover1-388.jpg', 'img/cover0-582.jpg', 'img/cover1-582.jpg'],
-      N = IMAGES.length, loaded = 0, img, i, promise = $.Deferred();
-    for (i = 0; i < N; ++i) {
+    var N = IMAGES.length, i = IMAGES.length, loaded = 0,
+      img, promise = $.Deferred();
+    while (i--) {
       img = new Image();
       img.onload = function () {
         if (++loaded === N)
@@ -281,16 +297,22 @@ Number.prototype.factorial = function () {
 
 
   function solvePuzzle() {
-    var solutions = Solver.solve(puzzle), solution, nSteps,
-      s = [$('table#solution0'), $('table#solution1')],
-      i, x, y, tr, td;
-    for (i = 0; i < solutions.length; ++i) {
+    var solutions = Solver.solve(puzzle, opts.n),
+      solution, nSteps,
+      s = (function() { 
+        var sol = [], i = solutions.length;
+        while (i--)
+          sol.push($('#solution' + i));
+        return sol;
+      })(),
+      x, y, tr, td, i = solutions.length;
+    while (i--) {
       s[i].empty();
       solution = solutions[i];
       for (y = 0; y < M; ++y) {
         tr = $('<tr></tr>');
         for (x = 0; x < N; ++x)
-          tr.append($('<td></td>').text((['', 'X'])[solution[x][y]]));
+          tr.append($('<td></td>').text(solution[x][y]));
         s[i].append(tr);
       }
       nSteps = solution.reduce(function (prev, curr) { return prev.concat(curr); }).reduce(function (prev, curr, idx, arr) { return prev + curr; }, 0);
@@ -301,12 +323,11 @@ Number.prototype.factorial = function () {
 
   function playSolution() {
     var i = 0,
-      solutions = Solver.solve(puzzle),
+      solutions = Solver.solve(puzzle, opts.n),
       solution = solutions[0],
       stopped = false,
-      playTimerId = null,
       flips = (function() {
-        var x, y, moves = [], n;
+        var x, y, n, moves = [];
         for (y = 0; y < M; ++y)
           for (x = 0; x < N; ++x) {
             n = solution[x][y];
@@ -316,9 +337,9 @@ Number.prototype.factorial = function () {
         return moves;
       })(),
       restoreButtons = function () {
-        $('button#solve').text('Lösen').off('click', stop).on('click', playSolution);
-        $('button#hint').prop('disabled', false);
-        $('button#new-game').prop('disabled', false);
+        $('#solve').text('Lösen').off('click', stop).on('click', playSolution);
+        $('#hint').prop('disabled', false);
+        $('#new-game').prop('disabled', false);
         $('#d-container').prop('disabled', false);
       },
       stop = function () {
@@ -331,7 +352,7 @@ Number.prototype.factorial = function () {
         if (i < flips.length) {
           turn(flips[i].x, flips[i].y);
           ++i;
-          playTimerId = setTimeout(makeTurn, 1000);
+          setTimeout(makeTurn, 1000);
         }
         else {
           restoreButtons();
@@ -339,14 +360,13 @@ Number.prototype.factorial = function () {
           newGame();
         }
       };
-    playTimerId = setTimeout(makeTurn, 250);
-    $('button#solve').text('Stopp').off('click', playSolution).on('click', stop);
-    $('button#hint').prop('disabled', true);
-    $('button#again').prop('disabled', true);
-    $('button#new-game').prop('disabled', true);
+    setTimeout(makeTurn, 250);
+    $('#solve').text('Stopp').off('click', playSolution).on('click', stop);
+    $('#hint').prop('disabled', true);
+    $('#again').prop('disabled', true);
+    $('#new-game').prop('disabled', true);
     $('#d-container').prop('disabled', true);
   }
-
 
   function init() {
     var p;
@@ -357,25 +377,92 @@ Number.prototype.factorial = function () {
         opts[p[0]] = parseInt(p[1], 10);
       });
     }
+    opts.n = opts.n.clamp(2, MAX_STATES);
     $.each(difficulties, function (i, d) {
       $('#d-container').append($('<option></option>').attr('value', i).text(d.d));
     });
-
     preloadImages()
       .then(function () {
-        $('button#solve').on('click', playSolution);
-        $('button#hint').on('click', solvePuzzle);
-        $('button#again').on('click', restart).prop('disabled', true);
+        $('#solve').on('click', playSolution);
+        $('#hint').on('click', solvePuzzle);
+        $('#again').on('click', restart).prop('disabled', true);
         $('#d-container').on('change', function () {
           newGame(parseInt($('#d-container').val(), 10));
         });
-        $('button#new-game').on('click', function () { newGame(parseInt($('#d-container').val(), 10)) });
+        $('#new-game').on('click', function () {
+          newGame(parseInt($('#d-container').val(), 10))
+        });
         newGame(
-          typeof opts.difficulty === 'number' ? Math.min(Math.max(opts.difficulty, 0), difficulties.length - 1) : 1,
-          typeof opts.game === 'number' ? opts.game : undefined
+          typeof opts.difficulty === 'number' ? opts.difficulty.clamp(0, difficulties.length - 1) : 1,
+          typeof opts.game === 'number' ? opts.game.clamp(0, RNG.MAX_VALUE) : undefined
         );
         $('#d-container').val(opts.difficulty);
         $(window).resize(resize).trigger('resize');
+        (function generateStyles () {
+          var i, ii, deg, r, styles = '', n = opts.n, a = cellW;
+          switch (n) {
+            case 0: /* fall-through */
+            case 1: console.error('Are you kidding me?'); return;
+            case 2: r = 0; break;
+            case 3: r = a / 6 * Math.sqrt(3); break;
+            case 4: r = a / 2; break;
+            case 5: r = a / 10 * Math.sqrt(25 + 10 * Math.sqrt(5)); break;
+            case 6: r = a * Math.sqrt(3) / 2; break;
+            default: console.error(n + '-hedrons not implemented.'); return;
+          }
+          for (i = 0; i < n; ++i) {
+            ii = (i + 1) % n;
+            deg = [i * 360 / n, (i + 1) * 360 / n];
+            $('#puzzle').after($('<table class="solution"></table>').attr('id', 'solution' + i));
+            styles += '\n'
+              + '#solution' + i + ' { left: 0; top: ' + (i * 100) /* XXX: bad for large puzzles */ + 'px; }\n'
+              + '.state' + i + ' { background-image: url("img/cover' + i + '-582.jpg"); }\n'
+              + '@media screen and (max-width: 480px) { .state' + i + ' { background-image: url("img/cover' + i + '-388.jpg"); } }\n'
+              + '.pos' + i + ' {\n'
+              + '  -moz-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
+              + '  -o-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
+              + '  -webkit-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
+              + '  animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
+              + '}\n'
+              + '@-moz-keyframes spin-to-pos' + i + ' {\n'
+              + '  from {\n'
+              + '    -moz-transform: translateZ(' + (-r) + 'px) rotateY(' + deg[0] + 'deg) translateZ(' + r + 'px);\n'
+              + '    transform: translateZ(' + (-r) + 'px) rotateY(' + deg[0] + 'deg) translateZ(' + r + 'px);\n'
+              + '  }\n'
+              + '  to {\n'
+              + '    -moz-transform: translateZ(' + (-r) + 'px) rotateY(' + deg[1] + 'deg) translateZ(' + r + 'px);\n'
+              + '    transform: translateZ(' + (-r) + 'px) rotateY(' + deg[1] + 'deg) translateZ(' + r + 'px);\n'
+              + '  }\n'
+              + '}\n'
+              + '@-webkit-keyframes spin-to-pos' + i + ' {\n'
+              + '  from {\n'
+              + '    -webkit-transform: translateZ(' + (-r) + 'px) rotateY(' + deg[0] + 'deg) translateZ(' + r + 'px);\n'
+              + '    transform: translateZ(' + (-r) + 'px) rotateY(' + deg[0] + 'deg) translateZ(' + r + 'px);\n'
+              + '  }\n'
+              + '  to {\n'
+              + '    -webkit-transform: translateZ(' + (-r) + 'px) rotateY(' + deg[1] + 'deg) translateZ(' + r + 'px);\n'
+              + '    transform: translateZ(' + (-r) + 'px) rotateY(' + deg[1] + 'deg) translateZ(' + r + 'px);\n'
+              + '  }\n'
+              + '}\n'
+              + '@keyframes spin-to-pos' + i + ' {\n'
+              + '  from {\n'
+              + '    -moz-transform: translateZ(' + (-r) + 'px) rotateY(' + deg[0] + 'deg) translateZ(' + r + 'px);\n'
+              + '    -ms-transform: translateZ(' + (-r) + 'px) rotateY(' + deg[0] + 'deg) translateZ(' + r + 'px);\n'
+              + '    -o-transform: translateZ(' + (-r) + 'px) rotateY(' + deg[0] + 'deg) translateZ(' + r + 'px);\n'
+              + '    -webkit-transform: translateZ(' + (-r) + 'px) rotateY(' + deg[0] + 'deg) translateZ(' + r + 'px);\n'
+              + '    transform: translateZ(' + (-r) + 'px) rotateY(' + deg[0] + 'deg) translateZ(' + r + 'px);\n'
+              + '  }\n'
+              + '  to {\n'
+              + '    -moz-transform: translateZ(' + (-r) + 'px) rotateY(' + deg[1] + 'deg) translateZ(' + r + 'px);\n'
+              + '    -ms-transform: translateZ(' + (-r) + 'px) rotateY(' + deg[1] + 'deg) translateZ(' + r + 'px);\n'
+              + '    -o-transform: translateZ(' + (-r) + 'px) rotateY(' + deg[1] + 'deg) translateZ(' + r + 'px);\n'
+              + '    -webkit-transform: translateZ(' + (-r) + 'px) rotateY(' + deg[1] + 'deg) translateZ(' + r + 'px);\n'
+              + '    transform: translateZ(' + (-r) + 'px) rotateY(' + deg[1] + 'deg) translateZ(' + r + 'px);\n'
+              + '  }\n'
+              + '}\n';
+          }
+          $('head').append($('<style type="text/css"></style>').text(styles));
+        })();
       });
   }
 

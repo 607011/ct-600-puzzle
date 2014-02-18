@@ -1,3 +1,5 @@
+// TODO: Solver spuckt falsche Lösungen aus für NUM_STATES > 2 ???
+
 var Solver = (function () {
   "use strict";
   /// Original solver by Norio Kato, http://www.ueda.info.waseda.ac.jp/~n-kato/lightsout/ 
@@ -182,10 +184,11 @@ var Solver = (function () {
     }
     return solutions;
   }  return {
-    solve: function (puzzle) {
+    solve: function (puzzle, states) {
       cells = puzzle;
       N = cells.length;
       M = cells[0].length;
+      nStates = states;
       return solved();
     }
   }

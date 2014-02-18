@@ -68,14 +68,6 @@ table.solution {
     font-size: smaller;
   }
 
-table#solution0 {
-  left: 5px;
-}
-
-table#solution1 {
-  right: 5px;
-}
-
 #puzzle {
   border-collapse: collapse;
   margin: 10px auto;
@@ -97,14 +89,10 @@ table#solution1 {
   -ms-perspective-origin: 50% 50%;
   -webkit-perspective-origin: 50% 50%;
   perspective-origin: 50% 50%;
-  -moz-transform-origin: 50% 50%;
-  -ms-transform-origin: 50% 50%;
-  -o-transform-origin: 50% 50%;
-  -webkit-transform-origin: 50% 50%;
-  transform-origin: 50% 50%;
   position: absolute;
   cursor: pointer;
   display: inline-block;
+  overflow: visible;
 }
 
 .three-d {
@@ -117,126 +105,6 @@ table#solution1 {
   backface-visibility: hidden;
   background-repeat: no-repeat;
   cursor: pointer;
-}
-
-  .three-d.state0 {
-    background-image: url('../img/cover0-582.jpg');
-  }
-
-  .three-d.state1 {
-    background-image: url('../img/cover1-582.jpg');
-  }
-
-  .three-d.state2 {
-    background-image: url('../img/cover2-582.jpg');
-  }
-
-  .three-d.front {
-    -moz-animation: spin-to-back ease 0.5s forwards;
-    -o-animation: spin-to-back ease 0.5s forwards;
-    -webkit-animation: spin-to-back ease 0.5s forwards;
-    animation: spin-to-back ease 0.5s forwards;
-    -moz-transform: rotateY(0deg);
-    -ms-transform: rotateY(0deg);
-    -o-transform: rotateY(0deg);
-    -webkit-transform: rotateY(0deg);
-    transform: rotateY(0deg);
-  }
-
-  .three-d.back {
-    -moz-animation: spin-to-front ease 0.5s forwards;
-    -o-animation: spin-to-front ease 0.5s forwards;
-    -webkit-animation: spin-to-front ease 0.5s forwards;
-    animation: spin-to-front ease 0.5s forwards;
-    -moz-transform: rotateY(180deg);
-    -ms-transform: rotateY(180deg);
-    -o-transform: rotateY(180deg);
-    -webkit-transform: rotateY(180deg);
-    transform: rotateY(180deg);
-  }
-
-@-moz-keyframes spin-to-front {
-  from {
-    -moz-transform: rotateY(0deg);
-    transform: rotateY(0deg);
-  }
-
-  to {
-    -moz-transform: rotateY(180deg);
-    transform: rotateY(180deg);
-  }
-}
-
-@-webkit-keyframes spin-to-front {
-  from {
-    -webkit-transform: rotateY(0deg);
-    transform: rotateY(0deg);
-  }
-
-  to {
-    -webkit-transform: rotateY(180deg);
-    transform: rotateY(180deg);
-  }
-}
-
-@keyframes spin-to-front {
-  from {
-    -moz-transform: rotateY(0deg);
-    -ms-transform: rotateY(0deg);
-    -o-transform: rotateY(0deg);
-    -webkit-transform: rotateY(0deg);
-    transform: rotateY(0deg);
-  }
-
-  to {
-    -moz-transform: rotateY(180deg);
-    -ms-transform: rotateY(180deg);
-    -o-transform: rotateY(180deg);
-    -webkit-transform: rotateY(180deg);
-    transform: rotateY(180deg);
-  }
-}
-
-@-moz-keyframes spin-to-back {
-  from {
-    -moz-transform: rotateY(180deg);
-    transform: rotateY(180deg);
-  }
-
-  to {
-    -moz-transform: rotateY(360deg);
-    transform: rotateY(360deg);
-  }
-}
-
-@-webkit-keyframes spin-to-back {
-  from {
-    -webkit-transform: rotateY(180deg);
-    transform: rotateY(180deg);
-  }
-
-  to {
-    -webkit-transform: rotateY(360deg);
-    transform: rotateY(360deg);
-  }
-}
-
-@keyframes spin-to-back {
-  from {
-    -moz-transform: rotateY(180deg);
-    -ms-transform: rotateY(180deg);
-    -o-transform: rotateY(180deg);
-    -webkit-transform: rotateY(180deg);
-    transform: rotateY(180deg);
-  }
-
-  to {
-    -moz-transform: rotateY(360deg);
-    -ms-transform: rotateY(360deg);
-    -o-transform: rotateY(360deg);
-    -webkit-transform: rotateY(360deg);
-    transform: rotateY(360deg);
-  }
 }
 
 button {
@@ -270,14 +138,6 @@ select {
   background-color: #bfd2db;
   vertical-align: bottom;
   cursor: pointer;
-}
-
-body.readme {
-  padding: 0.5ex 0.5em;
-}
-
-p {
-  padding: 1ex 0;
 }
 
 footer {
@@ -333,18 +193,6 @@ dd {
   #puzzle {
     width: 274px;
     height: 388px;
-  }
-
-  .three-d.state0 {
-    background-image: url('../img/cover0-388.jpg');
-  }
-
-  .three-d.state1 {
-    background-image: url('../img/cover1-388.jpg');
-  }
-
-  .three-d.state2 {
-    background-image: url('../img/cover2-388.jpg');
   }
 
   footer {
