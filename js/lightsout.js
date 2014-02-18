@@ -379,7 +379,12 @@ Number.prototype.factorial = function () {
     });
     preloadImages()
       .then(function () {
-        var i, ii, deg0, deg1, styles = '', tz = '-20px', ttz;
+        var i, ii, deg, styles = '', r, a,
+          getDeg = function (n, i) {
+            return (NUM_STATES > 2)
+              ? [i * (NUM_STATES - 2) / NUM_STATES * 360, (i + 1) * (NUM_STATES - 2) / NUM_STATES * 360]
+              : [i * 180, (i + 1) * 180];
+          };
         $('#solve').on('click', playSolution);
         $('#hint').on('click', solvePuzzle);
         $('#again').on('click', restart).prop('disabled', true);
@@ -395,20 +400,24 @@ Number.prototype.factorial = function () {
         );
         $('#d-container').val(opts.difficulty);
         $(window).resize(resize).trigger('resize');
+        // generate styles
+        a = cellW;
+        switch (NUM_STATES) {
+          case 0: // fall-through
+          case 1: console.error('Are you kidding me?'); return;
+          case 2: r = 0; break;
+          case 3: r = a / 6 * Math.sqrt(3); break;
+          case 4: r = a / 2; break;
+          case 5: r = a / 10 * Math.sqrt(25 + 10 * Math.sqrt(5)); break;
+          case 6: r = a * Math.sqrt(3) / 2; break;
+          default: console.error(NUM_STATES + '-hedrons not implemented.'); return;
+        }
         for (i = 0; i < NUM_STATES; ++i) {
           ii = (i + 1) % NUM_STATES;
-          deg0 = i * (NUM_STATES - 2) / NUM_STATES * 360;
-          deg1 = (i + 1) * (NUM_STATES - 2) / NUM_STATES * 360;
-          ttz = (-cellW/6) + 'px';
+          deg = getDeg(NUM_STATES, i);
           $('#puzzle').after($('<table class="solution"></table>').attr('id', 'solution' + i));
-          styles += '.three-d {\n'
-            + '  -moz-transform-origin: center center ' + tz + ';\n'
-            + '  -ms-transform-origin: center center ' + tz + ';\n'
-            + '  -o-transform-origin: center center ' + tz + ';\n'
-            + '  -webkit-transform-origin: center center ' + tz + ';\n'
-            + '  transform-origin: center center ' + tz + ';\n'
-            + '}\n'
-            + '#solution' + i + ' { left: 0; top: ' + (i * 100) + 'px; }\n'
+          styles += '\n'
+            + '#solution' + i + ' { left: 0; top: ' + (i * 100) /* XXX: bad for large puzzles */ + 'px; }\n'
             + '.state' + i + ' { background-image: url("img/cover' + i + '-582.jpg"); }\n'
             + '@media screen and (max-width: 480px) { .state' + i + ' { background-image: url("img/cover' + i + '-388.jpg"); } }\n'
             + '.pos' + i + ' {\n'
@@ -416,46 +425,41 @@ Number.prototype.factorial = function () {
             + '  -o-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
             + '  -webkit-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
             + '  animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
-            + '  -moz-transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
-            + '  -ms-transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
-            + '  -o-transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
-            + '  -webkit-transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
-            + '  transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
             + '}\n'
             + '@-moz-keyframes spin-to-pos' + i + ' {\n'
             + '  from {\n'
-            + '    -moz-transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
-            + '    transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
+            + '    -moz-transform: translateZ(' + (-r) + 'px) rotateY(' + deg[0] + 'deg) translateZ(' + r + 'px);\n'
+            + '    transform: translateZ(' + (-r) + 'px) rotateY(' + deg[0] + 'deg) translateZ(' + r + 'px);\n'
             + '  }\n'
             + '  to {\n'
-            + '    -moz-transform: rotateY(' + deg1 + 'deg) translateZ(' + ttz + ');\n'
-            + '    transform: rotateY(' + deg1 + 'deg) translateZ(' + ttz + ');\n'
+            + '    -moz-transform: translateZ(' + (-r) + 'px) rotateY(' + deg[1] + 'deg) translateZ(' + r + 'px);\n'
+            + '    transform: translateZ(' + (-r) + 'px) rotateY(' + deg[1] + 'deg) translateZ(' + r + 'px);\n'
             + '  }\n'
             + '}\n'
             + '@-webkit-keyframes spin-to-pos' + i + ' {\n'
             + '  from {\n'
-            + '    -webkit-transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
-            + '    transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
+            + '    -webkit-transform: translateZ(' + (-r) + 'px) rotateY(' + deg[0] + 'deg) translateZ(' + r + 'px);\n'
+            + '    transform: translateZ(' + (-r) + 'px) rotateY(' + deg[0] + 'deg) translateZ(' + r + 'px);\n'
             + '  }\n'
             + '  to {\n'
-            + '    -webkit-transform: rotateY(' + deg1 + 'deg) translateZ(' + ttz + ');\n'
-            + '    transform: rotateY(' + deg1 + 'deg) translateZ(' + ttz + ');\n'
+            + '    -webkit-transform: translateZ(' + (-r) + 'px) rotateY(' + deg[1] + 'deg) translateZ(' + r + 'px);\n'
+            + '    transform: translateZ(' + (-r) + 'px) rotateY(' + deg[1] + 'deg) translateZ(' + r + 'px);\n'
             + '  }\n'
             + '}\n'
             + '@keyframes spin-to-pos' + i + ' {\n'
             + '  from {\n'
-            + '    -moz-transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
-            + '    -ms-transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
-            + '    -o-transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
-            + '    -webkit-transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
-            + '    transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
+            + '    -moz-transform: translateZ(' + (-r) + 'px) rotateY(' + deg[0] + 'deg) translateZ(' + r + 'px);\n'
+            + '    -ms-transform: translateZ(' + (-r) + 'px) rotateY(' + deg[0] + 'deg) translateZ(' + r + 'px);\n'
+            + '    -o-transform: translateZ(' + (-r) + 'px) rotateY(' + deg[0] + 'deg) translateZ(' + r + 'px);\n'
+            + '    -webkit-transform: translateZ(' + (-r) + 'px) rotateY(' + deg[0] + 'deg) translateZ(' + r + 'px);\n'
+            + '    transform: translateZ(' + (-r) + 'px) rotateY(' + deg[0] + 'deg) translateZ(' + r + 'px);\n'
             + '  }\n'
             + '  to {\n'
-            + '    -moz-transform: rotateY(' + deg1 + 'deg) translateZ(' + ttz + ');\n'
-            + '    -ms-transform: rotateY(' + deg1 + 'deg) translateZ(' + ttz + ');\n'
-            + '    -o-transform: rotateY(' + deg1 + 'deg) translateZ(' + ttz + ');\n'
-            + '    -webkit-transform: rotateY(' + deg1 + 'deg) translateZ(' + ttz + ');\n'
-            + '    transform: rotateY(' + deg1 + 'deg) translateZ(' + ttz + ');\n'
+            + '    -moz-transform: translateZ(' + (-r) + 'px) rotateY(' + deg[1] + 'deg) translateZ(' + r + 'px);\n'
+            + '    -ms-transform: translateZ(' + (-r) + 'px) rotateY(' + deg[1] + 'deg) translateZ(' + r + 'px);\n'
+            + '    -o-transform: translateZ(' + (-r) + 'px) rotateY(' + deg[1] + 'deg) translateZ(' + r + 'px);\n'
+            + '    -webkit-transform: translateZ(' + (-r) + 'px) rotateY(' + deg[1] + 'deg) translateZ(' + r + 'px);\n'
+            + '    transform: translateZ(' + (-r) + 'px) rotateY(' + deg[1] + 'deg) translateZ(' + r + 'px);\n'
             + '  }\n'
             + '}\n';
         }

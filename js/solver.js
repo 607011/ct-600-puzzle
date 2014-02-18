@@ -1,3 +1,5 @@
+// TODO: Solver spuckt falsche Lösungen aus für NUM_STATES > 2 ???
+
 var Solver = (function () {
   "use strict";
   /// Original solver by Norio Kato, http://www.ueda.info.waseda.ac.jp/~n-kato/lightsout/ 
