@@ -23,6 +23,9 @@ Number.prototype.factorial = function () {
   return x;
 };
 
+Number.prototype.clamp = function (lo, hi) {
+  return Math.min(Math.max(this, lo), hi);
+};
 
 (function () {
   "use strict";
@@ -41,17 +44,17 @@ Number.prototype.factorial = function () {
     return this.X;
   };
 
-  var opts = { game: null, difficulty: null },
-    NUM_STATES = 3,
+  var opts = { game: null, difficulty: null, n: 2 },
+    MAX_STATES = 6,
     IMAGES = (function () {
-      var images = [], i = NUM_STATES;
+      var images = [], i = opts.n;
       while (i--) {
         images.push('img/cover' + i + '-582.jpg');
         images.push('img/cover' + i + '-388.jpg');
       }
       return images;
     })(),
-    // TODO: Berechnen von `difficulties` anhand von `NUM_STATES`
+    // TODO: Berechnen von `difficulties` anhand von `opts.n`
     difficulties = [
       { d: 'leicht', n: 3, m: 4, mid: [
         [1, 1, 1],
@@ -86,7 +89,7 @@ Number.prototype.factorial = function () {
         .map(function (curr, idx, arr) { return (curr === v) ? idx : null; })
         .filter(function (val) { return val !== null; });
     },
-    // TODO: Berechnen von `middle` anhand von `NUM_STATES`
+    // TODO: Berechnen von `middle` anhand von `opts.n`
     middle = [
       {
         0: indexesByValue(difficulties[0].mid, 0),
@@ -109,13 +112,13 @@ Number.prototype.factorial = function () {
 
   function flip(x, y) {
     var i, j, cell, m;
-    puzzle[x][y] = (puzzle[x][y] + 1) % NUM_STATES;
-    for (i = 0; i < NUM_STATES; ++i) {
+    puzzle[x][y] = (puzzle[x][y] + 1) % opts.n;
+    for (i = 0; i < opts.n; ++i) {
       cell = $('#pos' + i + '-' + x + '-' + y);
       if (cell.length === 0)
         continue;
       m = cell.attr('class').match(/pos(\d+)/);
-      cell.addClass('pos' + ((parseInt(m[1], 10) + 1) % NUM_STATES)).removeClass(m[0]);
+      cell.addClass('pos' + ((parseInt(m[1], 10) + 1) % opts.n)).removeClass(m[0]);
     }
   }
 
@@ -164,7 +167,7 @@ Number.prototype.factorial = function () {
     $('#puzzle').width((cellW * N) + 'px').height((cellH * M) + 'px');
     tw = cellW + 'px';
     th = cellH + 'px';
-    for (i = 0; i < NUM_STATES; ++i)
+    for (i = 0; i < opts.n; ++i)
       $('.pos' + i).css('width', tw).css('height', th);
     cells.css('width', tw).css('height', th);
     for (y = 0; y < M; ++y) {
@@ -172,7 +175,7 @@ Number.prototype.factorial = function () {
         left = x * cellW;
         top = y * cellH;
         $('#cell-' + x + '-' + y).css('left', left + 'px').css('top', top + 'px');
-        for (i = 0; i < NUM_STATES; ++i)
+        for (i = 0; i < opts.n; ++i)
           $('#pos' + i + '-' + x + '-' + y)
             .css('background-position', (-left) + 'px ' + (-top) + 'px');
       }
@@ -202,12 +205,12 @@ Number.prototype.factorial = function () {
           .attr('id', 'cell-' + x + '-' + y)
           .addClass('cell')
           .on('click', clickTile.bind(null, x, y));
-        for (i = 0; i < NUM_STATES; ++i) {
+        for (i = 0; i < opts.n; ++i) {
           cell.append($('<span></span>')
             .addClass('three-d')
             .attr('id', 'pos' + i + '-' + x + '-' + y)
             .addClass('pos' + i)
-            .addClass('state' + (puzzle[x][y] + i) % NUM_STATES));
+            .addClass('state' + (puzzle[x][y] + i) % opts.n));
         }
         p.append(cell);
       }
@@ -232,7 +235,7 @@ Number.prototype.factorial = function () {
     clearPuzzle();
     rng.seed(opts.game);
     $('#game-number').text(opts.game);
-    // TODO: Berechnen des Startzustandes anhand von `NUM_STATES`
+    // TODO: Berechnen des Startzustandes anhand von `opts.n`
     ones = middle[opts.difficulty][0].slice(0);  // clone
     zeros = middle[opts.difficulty][1].slice(0); // clone
     // discard half of the ones
@@ -253,7 +256,7 @@ Number.prototype.factorial = function () {
 
 
   function newGame(difficulty, num) {
-    var i = NUM_STATES;
+    var i = opts.n;
     while (i--)
       $('#solution' + i).empty();
     opts.difficulty = (typeof difficulty === 'number') ? difficulty : opts.difficulty;
@@ -294,7 +297,7 @@ Number.prototype.factorial = function () {
 
 
   function solvePuzzle() {
-    var solutions = Solver.solve(puzzle, NUM_STATES),
+    var solutions = Solver.solve(puzzle, opts.n),
       solution, nSteps,
       s = (function() { 
         var sol = [], i = solutions.length;
@@ -320,7 +323,7 @@ Number.prototype.factorial = function () {
 
   function playSolution() {
     var i = 0,
-      solutions = Solver.solve(puzzle, NUM_STATES),
+      solutions = Solver.solve(puzzle, opts.n),
       solution = solutions[0],
       stopped = false,
       flips = (function() {
@@ -374,6 +377,7 @@ Number.prototype.factorial = function () {
         opts[p[0]] = parseInt(p[1], 10);
       });
     }
+    opts.n = opts.n.clamp(2, MAX_STATES);
     $.each(difficulties, function (i, d) {
       $('#d-container').append($('<option></option>').attr('value', i).text(d.d));
     });
@@ -381,8 +385,8 @@ Number.prototype.factorial = function () {
       .then(function () {
         var i, ii, deg, styles = '', r, a,
           getDeg = function (n, i) {
-            return (NUM_STATES > 2)
-              ? [i * (NUM_STATES - 2) / NUM_STATES * 360, (i + 1) * (NUM_STATES - 2) / NUM_STATES * 360]
+            return (opts.n > 2)
+              ? [i * (opts.n - 2) / opts.n * 360, (i + 1) * (opts.n - 2) / opts.n * 360]
               : [i * 180, (i + 1) * 180];
           };
         $('#solve').on('click', playSolution);
@@ -395,14 +399,14 @@ Number.prototype.factorial = function () {
           newGame(parseInt($('#d-container').val(), 10))
         });
         newGame(
-          typeof opts.difficulty === 'number' ? Math.min(Math.max(opts.difficulty, 0), difficulties.length - 1) : 1,
-          typeof opts.game === 'number' ? opts.game : undefined
+          typeof opts.difficulty === 'number' ? opts.difficulty.clamp(0, difficulties.length - 1) : 1,
+          typeof opts.game === 'number' ? opts.game.clamp(0, RNG.MAX_VALUE) : undefined
         );
         $('#d-container').val(opts.difficulty);
         $(window).resize(resize).trigger('resize');
         // generate styles
         a = cellW;
-        switch (NUM_STATES) {
+        switch (opts.n) {
           case 0: // fall-through
           case 1: console.error('Are you kidding me?'); return;
           case 2: r = 0; break;
@@ -410,11 +414,11 @@ Number.prototype.factorial = function () {
           case 4: r = a / 2; break;
           case 5: r = a / 10 * Math.sqrt(25 + 10 * Math.sqrt(5)); break;
           case 6: r = a * Math.sqrt(3) / 2; break;
-          default: console.error(NUM_STATES + '-hedrons not implemented.'); return;
+          default: console.error(opts.n + '-hedrons not implemented.'); return;
         }
-        for (i = 0; i < NUM_STATES; ++i) {
-          ii = (i + 1) % NUM_STATES;
-          deg = getDeg(NUM_STATES, i);
+        for (i = 0; i < opts.n; ++i) {
+          ii = (i + 1) % opts.n;
+          deg = getDeg(opts.n, i);
           $('#puzzle').after($('<table class="solution"></table>').attr('id', 'solution' + i));
           styles += '\n'
             + '#solution' + i + ' { left: 0; top: ' + (i * 100) /* XXX: bad for large puzzles */ + 'px; }\n'
