@@ -42,18 +42,16 @@ Number.prototype.factorial = function () {
   };
 
   var opts = { game: null, difficulty: null },
-    Positions = ['pos0', 'pos1'],
-    nPositions = Positions.length,
-    States = ['state0', 'state1'],
-    nStates = States.length,
+    NUM_STATES = 2,
     IMAGES = (function () {
-      var images = [], i = nStates;
+      var images = [], i = NUM_STATES;
       while (i--) {
         images.push('img/cover' + i + '-582.jpg');
         images.push('img/cover' + i + '-388.jpg');
       }
       return images;
     })(),
+    // TODO: Berechnen von `difficulties` anhand von `NUM_STATES`
     difficulties = [
       { d: 'leicht', n: 3, m: 4, mid: [
         [1, 1, 1],
@@ -88,6 +86,7 @@ Number.prototype.factorial = function () {
         .map(function (curr, idx, arr) { return (curr === v) ? idx : null; })
         .filter(function (val) { return val !== null; });
     },
+    // TODO: Berechnen von `middle` anhand von `NUM_STATES`
     middle = [
       {
         0: indexesByValue(difficulties[0].mid, 0),
@@ -107,17 +106,13 @@ Number.prototype.factorial = function () {
     N, M, nFields, nTurns, nCombinations;
 
 
-  if (nPositions !== nStates)
-    console.error('`nPositions` must equal `nStates`');
-
-
   function flip(x, y) {
     var i, j, cell;
-    puzzle[x][y] = (puzzle[x][y] + 1) % nStates;
-    for (i = 0; i < nPositions; ++i) {
-      cell = $('#' + Positions[i] + '-' + x + '-' + y);
-      for (j = 0; j < nPositions; ++j)
-        cell.toggleClass(Positions[j]);
+    puzzle[x][y] = (puzzle[x][y] + 1) % NUM_STATES;
+    for (i = 0; i < NUM_STATES; ++i) {
+      cell = $('#pos' + i + '-' + x + '-' + y);
+      for (j = 0; j < NUM_STATES; ++j)
+        cell.toggleClass('pos' + j);
     }
   }
 
@@ -166,16 +161,16 @@ Number.prototype.factorial = function () {
     $('#puzzle').width((dw * N) + 'px').height((dh * M) + 'px');
     tw = dw + 'px';
     th = dh + 'px';
-    for (i = 0; i < nPositions; ++i)
-      $('.' + Positions[i]).css('width', tw).css('height', th);
+    for (i = 0; i < NUM_STATES; ++i)
+      $('.pos' + i).css('width', tw).css('height', th);
     cells.css('width', tw).css('height', th);
     for (y = 0; y < M; ++y) {
       for (x = 0; x < N; ++x) {
         left = x * dw;
         top = y * dh;
         $('#cell-' + x + '-' + y).css('left', left + 'px').css('top', top + 'px');
-        for (i = 0; i < nPositions; ++i)
-          $('#' + Positions[i] + '-' + x + '-' + y)
+        for (i = 0; i < NUM_STATES; ++i)
+          $('#pos' + i + '-' + x + '-' + y)
             .css('background-position', (-left) + 'px ' + (-top) + 'px');
       }
     }
@@ -204,12 +199,12 @@ Number.prototype.factorial = function () {
           .attr('id', 'cell-' + x + '-' + y)
           .addClass('cell')
           .on('click', clickTile.bind(null, x, y));
-        for (i = 0; i < nPositions; ++i) {
+        for (i = 0; i < NUM_STATES; ++i) {
           cell.append($('<span></span>')
             .addClass('three-d')
-            .attr('id', Positions[i] + '-' + x + '-' + y)
-            .addClass(Positions[i])
-            .addClass(States[(puzzle[x][y] + i) % nStates]));
+            .attr('id', 'pos' + i + '-' + x + '-' + y)
+            .addClass('pos' + i)
+            .addClass('state' + (puzzle[x][y] + i) % NUM_STATES));
         }
         p.append(cell);
       }
@@ -234,6 +229,7 @@ Number.prototype.factorial = function () {
     clearPuzzle();
     rng.seed(opts.game);
     $('#game-number').text(opts.game);
+    // TODO: Berechnen des Startzustandes anhand von `NUM_STATES`
     ones = middle[opts.difficulty][0].slice(0);  // clone
     zeros = middle[opts.difficulty][1].slice(0); // clone
     // discard half of the ones
@@ -254,7 +250,7 @@ Number.prototype.factorial = function () {
 
 
   function newGame(difficulty, num) {
-    var i = nStates;
+    var i = NUM_STATES;
     while (i--)
       $('#solution' + i).empty();
     opts.difficulty = (typeof difficulty === 'number') ? difficulty : opts.difficulty;
@@ -295,7 +291,7 @@ Number.prototype.factorial = function () {
 
 
   function solvePuzzle() {
-    var solutions = Solver.solve(puzzle, nStates),
+    var solutions = Solver.solve(puzzle, NUM_STATES),
       solution, nSteps,
       s = (function() { 
         var sol = [], i = solutions.length;
@@ -321,7 +317,7 @@ Number.prototype.factorial = function () {
 
   function playSolution() {
     var i = 0,
-      solutions = Solver.solve(puzzle, nStates),
+      solutions = Solver.solve(puzzle, NUM_STATES),
       solution = solutions[0],
       stopped = false,
       flips = (function() {
@@ -366,11 +362,72 @@ Number.prototype.factorial = function () {
     $('#d-container').prop('disabled', true);
   }
 
-
   function init() {
-    var p, i = nStates;
-    while (i--)
+    var p, i, ii, deg0, deg1, styles = '', tz = '0px';
+    for (i = 0; i < NUM_STATES; ++i) {
+      ii = (i + 1) % NUM_STATES;
+      deg0 = i * 360 / NUM_STATES;
+      deg1 = (i + 1) * 360 / NUM_STATES;
       $('#puzzle').after($('<table></table>').attr('id', 'solution' + i).addClass('solution'));
+      styles += '.cell {\n'
+        + '  -moz-transform-origin: 50% 50% ' + tz + ';\n'
+        + '  -ms-transform-origin: 50% 50% ' + tz + ';\n'
+        + '  -o-transform-origin: 50% 50% ' + tz + ';\n'
+        + '  -webkit-transform-origin: 50% 50% ' + tz + ';\n'
+        + '  transform-origin: 50% 50% ' + tz + ';\n'
+        + '}\n'
+        + '#solution' + i + ' { left: 0; top: ' + (i * 100) + 'px; }\n'
+        + '.state' + i + ' { background-image: url("img/cover' + i + '-582.jpg"); }\n'
+        + '@media screen and (max-width: 480px) { .state' + i + ' { background-image: url("img/cover' + i + '-388.jpg"); } }\n'
+        + '.pos' + i + ' {\n'
+        + '  -moz-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
+        + '  -o-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
+        + '  -webkit-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
+        + '  animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
+        + '  -moz-transform: rotateY(' + deg0 + 'deg);\n'
+        + '  -ms-transform: rotateY(' + deg0 + 'deg);\n'
+        + '  -o-transform: rotateY(' + deg0 + 'deg);\n'
+        + '  -webkit-transform: rotateY(' + deg0 + 'deg);\n'
+        + '  transform: rotateY(' + deg0 + 'deg);\n'
+        + '}\n'
+        + '@-moz-keyframes spin-to-pos' + i + ' {\n'
+        + '  from {\n'
+        + '    -moz-transform: rotateY(' + deg0 + 'deg);\n'
+        + '    transform: rotateY(' + deg0 + 'deg);\n'
+        + '  }\n'
+        + '  to {\n'
+        + '    -moz-transform: rotateY(' + deg1 + 'deg);\n'
+        + '    transform: rotateY(' + deg1 + 'deg);\n'
+        + '  }\n'
+        + '}\n'
+        + '@-webkit-keyframes spin-to-pos' + i + ' {\n'
+        + '  from {\n'
+        + '    -webkit-transform: rotateY(' + deg0 + 'deg);\n'
+        + '    transform: rotateY(' + deg0 + 'deg);\n'
+        + '  }\n'
+        + '  to {\n'
+        + '    -webkit-transform: rotateY(' + deg1 + 'deg);\n'
+        + '    transform: rotateY(' + deg1 + 'deg);\n'
+        + '  }\n'
+        + '}\n'
+        + '@keyframes spin-to-pos' + i + ' {\n'
+        + '  from {\n'
+        + '    -moz-transform: rotateY(' + deg0 + 'deg);\n'
+        + '    -ms-transform: rotateY(' + deg0 + 'deg);\n'
+        + '    -o-transform: rotateY(' + deg0 + 'deg);\n'
+        + '    -webkit-transform: rotateY(' + deg0 + 'deg);\n'
+        + '    transform: rotateY(' + deg0 + 'deg);\n'
+        + '  }\n'
+        + '  to {\n'
+        + '    -moz-transform: rotateY(' + deg1 + 'deg);\n'
+        + '    -ms-transform: rotateY(' + deg1 + 'deg);\n'
+        + '    -o-transform: rotateY(' + deg1 + 'deg);\n'
+        + '    -webkit-transform: rotateY(' + deg1 + 'deg);\n'
+        + '    transform: rotateY(' + deg1 + 'deg);\n'
+        + '  }\n'
+        + '}\n';
+    }
+    $('head').append($('<style type="text/css"></style>').text(styles));
     if (document.location.hash.length > 1) {
       p = document.location.hash.substring(1).split(';');
       $.each(p, function (i, d) {
