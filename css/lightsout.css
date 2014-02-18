@@ -149,14 +149,6 @@ select {
   cursor: pointer;
 }
 
-body.readme {
-  padding: 0.5ex 0.5em;
-}
-
-p {
-  padding: 1ex 0;
-}
-
 footer {
   position: relative;
   margin: 0 auto;

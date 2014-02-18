@@ -368,13 +368,13 @@ Number.prototype.factorial = function () {
       ii = (i + 1) % NUM_STATES;
       deg0 = i * 360 / NUM_STATES;
       deg1 = (i + 1) * 360 / NUM_STATES;
-      $('#puzzle').after($('<table></table>').attr('id', 'solution' + i).addClass('solution'));
-      styles += '.cell {\n'
-        + '  -moz-transform-origin: 50% 50% ' + tz + ';\n'
-        + '  -ms-transform-origin: 50% 50% ' + tz + ';\n'
-        + '  -o-transform-origin: 50% 50% ' + tz + ';\n'
-        + '  -webkit-transform-origin: 50% 50% ' + tz + ';\n'
-        + '  transform-origin: 50% 50% ' + tz + ';\n'
+      $('#puzzle').after($('<table class="solution"></table>').attr('id', 'solution' + i));
+      styles += '.three-d {\n'
+        + '  -moz-transform-origin: center center ' + tz + ';\n'
+        + '  -ms-transform-origin: center center ' + tz + ';\n'
+        + '  -o-transform-origin: center center ' + tz + ';\n'
+        + '  -webkit-transform-origin: center center ' + tz + ';\n'
+        + '  transform-origin: center center ' + tz + ';\n'
         + '}\n'
         + '#solution' + i + ' { left: 0; top: ' + (i * 100) + 'px; }\n'
         + '.state' + i + ' { background-image: url("img/cover' + i + '-582.jpg"); }\n'
@@ -384,11 +384,11 @@ Number.prototype.factorial = function () {
         + '  -o-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
         + '  -webkit-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
         + '  animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
-        + '  -moz-transform: rotateY(' + deg0 + 'deg);\n'
-        + '  -ms-transform: rotateY(' + deg0 + 'deg);\n'
-        + '  -o-transform: rotateY(' + deg0 + 'deg);\n'
-        + '  -webkit-transform: rotateY(' + deg0 + 'deg);\n'
-        + '  transform: rotateY(' + deg0 + 'deg);\n'
+        + '  -moz-transform: translate(0,0,0) rotateY(' + deg0 + 'deg);\n'
+        + '  -ms-transform: translate(0,0,0) rotateY(' + deg0 + 'deg);\n'
+        + '  -o-transform: translate(0,0,0) rotateY(' + deg0 + 'deg);\n'
+        + '  -webkit-transform: translate(0,0,0) rotateY(' + deg0 + 'deg);\n'
+        + '  transform: translate(0,0,0) rotateY(' + deg0 + 'deg);\n'
         + '}\n'
         + '@-moz-keyframes spin-to-pos' + i + ' {\n'
         + '  from {\n'
