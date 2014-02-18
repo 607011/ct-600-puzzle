@@ -22,8 +22,6 @@ html, body {
 }
 
 #main {
-  display: block;
-  padding: 10px 0;
   position: relative;
 }
 
