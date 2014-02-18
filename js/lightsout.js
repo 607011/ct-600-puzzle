@@ -42,7 +42,7 @@ Number.prototype.factorial = function () {
   };
 
   var opts = { game: null, difficulty: null },
-    NUM_STATES = 2,
+    NUM_STATES = 3,
     IMAGES = (function () {
       var images = [], i = NUM_STATES;
       while (i--) {
@@ -103,16 +103,19 @@ Number.prototype.factorial = function () {
     ],
     rng = new RNG(),
     puzzle, moves,
-    N, M, nFields, nTurns, nCombinations;
+    N, M, nFields, nTurns, nCombinations,
+    cellW, cellH;
 
 
   function flip(x, y) {
-    var i, j, cell;
+    var i, j, cell, m;
     puzzle[x][y] = (puzzle[x][y] + 1) % NUM_STATES;
     for (i = 0; i < NUM_STATES; ++i) {
       cell = $('#pos' + i + '-' + x + '-' + y);
-      for (j = 0; j < NUM_STATES; ++j)
-        cell.toggleClass('pos' + j);
+      if (cell.length === 0)
+        continue;
+      m = cell.attr('class').match(/pos(\d+)/);
+      cell.addClass('pos' + ((parseInt(m[1], 10) + 1) % NUM_STATES)).removeClass(m[0]);
     }
   }
 
@@ -147,27 +150,27 @@ Number.prototype.factorial = function () {
 
 
   function resize() {
-    var i, x, y, dw, dh, tw, th, persp, cells = $('#puzzle .cell'), left, top;
+    var i, x, y, tw, th, persp, cells = $('#puzzle .cell'), left, top;
     if ($(window).width() >= 480) {
-      dw = Math.floor(411 / N);
-      dh = Math.floor(582 / M);
+      cellW = Math.floor(411 / N);
+      cellH = Math.floor(582 / M);
       persp = 2;
     }
     else {
-      dw = Math.floor(274 / N);
-      dh = Math.floor(388 / M);
+      cellW = Math.floor(274 / N);
+      cellH = Math.floor(388 / M);
       persp = 3;
     }
-    $('#puzzle').width((dw * N) + 'px').height((dh * M) + 'px');
-    tw = dw + 'px';
-    th = dh + 'px';
+    $('#puzzle').width((cellW * N) + 'px').height((cellH * M) + 'px');
+    tw = cellW + 'px';
+    th = cellH + 'px';
     for (i = 0; i < NUM_STATES; ++i)
       $('.pos' + i).css('width', tw).css('height', th);
     cells.css('width', tw).css('height', th);
     for (y = 0; y < M; ++y) {
       for (x = 0; x < N; ++x) {
-        left = x * dw;
-        top = y * dh;
+        left = x * cellW;
+        top = y * cellH;
         $('#cell-' + x + '-' + y).css('left', left + 'px').css('top', top + 'px');
         for (i = 0; i < NUM_STATES; ++i)
           $('#pos' + i + '-' + x + '-' + y)
@@ -175,7 +178,7 @@ Number.prototype.factorial = function () {
       }
     }
     $.each(['-moz-', '-ms-', '-webkit-', ''], function (i, prefix) {
-      cells.css(prefix + 'perspective', Math.round(persp * dw) + 'px');
+      cells.css(prefix + 'perspective', Math.round(persp * cellW) + 'px');
     });
   }
 
@@ -363,71 +366,7 @@ Number.prototype.factorial = function () {
   }
 
   function init() {
-    var p, i, ii, deg0, deg1, styles = '', tz = '0px';
-    for (i = 0; i < NUM_STATES; ++i) {
-      ii = (i + 1) % NUM_STATES;
-      deg0 = i * 360 / NUM_STATES;
-      deg1 = (i + 1) * 360 / NUM_STATES;
-      $('#puzzle').after($('<table class="solution"></table>').attr('id', 'solution' + i));
-      styles += '.three-d {\n'
-        + '  -moz-transform-origin: center center ' + tz + ';\n'
-        + '  -ms-transform-origin: center center ' + tz + ';\n'
-        + '  -o-transform-origin: center center ' + tz + ';\n'
-        + '  -webkit-transform-origin: center center ' + tz + ';\n'
-        + '  transform-origin: center center ' + tz + ';\n'
-        + '}\n'
-        + '#solution' + i + ' { left: 0; top: ' + (i * 100) + 'px; }\n'
-        + '.state' + i + ' { background-image: url("img/cover' + i + '-582.jpg"); }\n'
-        + '@media screen and (max-width: 480px) { .state' + i + ' { background-image: url("img/cover' + i + '-388.jpg"); } }\n'
-        + '.pos' + i + ' {\n'
-        + '  -moz-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
-        + '  -o-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
-        + '  -webkit-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
-        + '  animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
-        + '  -moz-transform: translate(0,0,0) rotateY(' + deg0 + 'deg);\n'
-        + '  -ms-transform: translate(0,0,0) rotateY(' + deg0 + 'deg);\n'
-        + '  -o-transform: translate(0,0,0) rotateY(' + deg0 + 'deg);\n'
-        + '  -webkit-transform: translate(0,0,0) rotateY(' + deg0 + 'deg);\n'
-        + '  transform: translate(0,0,0) rotateY(' + deg0 + 'deg);\n'
-        + '}\n'
-        + '@-moz-keyframes spin-to-pos' + i + ' {\n'
-        + '  from {\n'
-        + '    -moz-transform: rotateY(' + deg0 + 'deg);\n'
-        + '    transform: rotateY(' + deg0 + 'deg);\n'
-        + '  }\n'
-        + '  to {\n'
-        + '    -moz-transform: rotateY(' + deg1 + 'deg);\n'
-        + '    transform: rotateY(' + deg1 + 'deg);\n'
-        + '  }\n'
-        + '}\n'
-        + '@-webkit-keyframes spin-to-pos' + i + ' {\n'
-        + '  from {\n'
-        + '    -webkit-transform: rotateY(' + deg0 + 'deg);\n'
-        + '    transform: rotateY(' + deg0 + 'deg);\n'
-        + '  }\n'
-        + '  to {\n'
-        + '    -webkit-transform: rotateY(' + deg1 + 'deg);\n'
-        + '    transform: rotateY(' + deg1 + 'deg);\n'
-        + '  }\n'
-        + '}\n'
-        + '@keyframes spin-to-pos' + i + ' {\n'
-        + '  from {\n'
-        + '    -moz-transform: rotateY(' + deg0 + 'deg);\n'
-        + '    -ms-transform: rotateY(' + deg0 + 'deg);\n'
-        + '    -o-transform: rotateY(' + deg0 + 'deg);\n'
-        + '    -webkit-transform: rotateY(' + deg0 + 'deg);\n'
-        + '    transform: rotateY(' + deg0 + 'deg);\n'
-        + '  }\n'
-        + '  to {\n'
-        + '    -moz-transform: rotateY(' + deg1 + 'deg);\n'
-        + '    -ms-transform: rotateY(' + deg1 + 'deg);\n'
-        + '    -o-transform: rotateY(' + deg1 + 'deg);\n'
-        + '    -webkit-transform: rotateY(' + deg1 + 'deg);\n'
-        + '    transform: rotateY(' + deg1 + 'deg);\n'
-        + '  }\n'
-        + '}\n';
-    }
-    $('head').append($('<style type="text/css"></style>').text(styles));
+    var p;
     if (document.location.hash.length > 1) {
       p = document.location.hash.substring(1).split(';');
       $.each(p, function (i, d) {
@@ -440,6 +379,7 @@ Number.prototype.factorial = function () {
     });
     preloadImages()
       .then(function () {
+        var i, ii, deg0, deg1, styles = '', tz = '-20px', ttz;
         $('#solve').on('click', playSolution);
         $('#hint').on('click', solvePuzzle);
         $('#again').on('click', restart).prop('disabled', true);
@@ -455,6 +395,71 @@ Number.prototype.factorial = function () {
         );
         $('#d-container').val(opts.difficulty);
         $(window).resize(resize).trigger('resize');
+        for (i = 0; i < NUM_STATES; ++i) {
+          ii = (i + 1) % NUM_STATES;
+          deg0 = i * (NUM_STATES - 2) / NUM_STATES * 360;
+          deg1 = (i + 1) * (NUM_STATES - 2) / NUM_STATES * 360;
+          ttz = (-cellW/6) + 'px';
+          $('#puzzle').after($('<table class="solution"></table>').attr('id', 'solution' + i));
+          styles += '.three-d {\n'
+            + '  -moz-transform-origin: center center ' + tz + ';\n'
+            + '  -ms-transform-origin: center center ' + tz + ';\n'
+            + '  -o-transform-origin: center center ' + tz + ';\n'
+            + '  -webkit-transform-origin: center center ' + tz + ';\n'
+            + '  transform-origin: center center ' + tz + ';\n'
+            + '}\n'
+            + '#solution' + i + ' { left: 0; top: ' + (i * 100) + 'px; }\n'
+            + '.state' + i + ' { background-image: url("img/cover' + i + '-582.jpg"); }\n'
+            + '@media screen and (max-width: 480px) { .state' + i + ' { background-image: url("img/cover' + i + '-388.jpg"); } }\n'
+            + '.pos' + i + ' {\n'
+            + '  -moz-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
+            + '  -o-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
+            + '  -webkit-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
+            + '  animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
+            + '  -moz-transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
+            + '  -ms-transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
+            + '  -o-transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
+            + '  -webkit-transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
+            + '  transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
+            + '}\n'
+            + '@-moz-keyframes spin-to-pos' + i + ' {\n'
+            + '  from {\n'
+            + '    -moz-transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
+            + '    transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
+            + '  }\n'
+            + '  to {\n'
+            + '    -moz-transform: rotateY(' + deg1 + 'deg) translateZ(' + ttz + ');\n'
+            + '    transform: rotateY(' + deg1 + 'deg) translateZ(' + ttz + ');\n'
+            + '  }\n'
+            + '}\n'
+            + '@-webkit-keyframes spin-to-pos' + i + ' {\n'
+            + '  from {\n'
+            + '    -webkit-transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
+            + '    transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
+            + '  }\n'
+            + '  to {\n'
+            + '    -webkit-transform: rotateY(' + deg1 + 'deg) translateZ(' + ttz + ');\n'
+            + '    transform: rotateY(' + deg1 + 'deg) translateZ(' + ttz + ');\n'
+            + '  }\n'
+            + '}\n'
+            + '@keyframes spin-to-pos' + i + ' {\n'
+            + '  from {\n'
+            + '    -moz-transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
+            + '    -ms-transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
+            + '    -o-transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
+            + '    -webkit-transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
+            + '    transform: rotateY(' + deg0 + 'deg) translateZ(' + ttz + ');\n'
+            + '  }\n'
+            + '  to {\n'
+            + '    -moz-transform: rotateY(' + deg1 + 'deg) translateZ(' + ttz + ');\n'
+            + '    -ms-transform: rotateY(' + deg1 + 'deg) translateZ(' + ttz + ');\n'
+            + '    -o-transform: rotateY(' + deg1 + 'deg) translateZ(' + ttz + ');\n'
+            + '    -webkit-transform: rotateY(' + deg1 + 'deg) translateZ(' + ttz + ');\n'
+            + '    transform: rotateY(' + deg1 + 'deg) translateZ(' + ttz + ');\n'
+            + '  }\n'
+            + '}\n';
+        }
+        $('head').append($('<style type="text/css"></style>').text(styles));
       });
   }
 
