@@ -29,6 +29,7 @@ Number.prototype.factorial = function () {
   var RNG = function (seed) {
     this.seed(seed || Date.now());
   };
+  RNG.MAX_VALUE = 4294967296;
   RNG.prototype.seed = function (seed) {
     if (typeof seed !== 'number')
       throw new TypeError('Parameter `seed` must be a number');
@@ -36,11 +37,23 @@ Number.prototype.factorial = function () {
   };
   RNG.prototype.next = function () {
     // LCG from the book 'Numerical Recipes'
-    this.X = (1664525 * this.X + 1013904223) % 4294967296;
+    this.X = (1664525 * this.X + 1013904223) % RNG.MAX_VALUE;
     return this.X;
   };
 
   var opts = { game: null, difficulty: null },
+    Positions = ['pos0', 'pos1'],
+    nPositions = Positions.length,
+    States = ['state0', 'state1'],
+    nStates = States.length,
+    IMAGES = (function () {
+      var images = [], i = nStates;
+      while (i--) {
+        images.push('img/cover' + i + '-582.jpg');
+        images.push('img/cover' + i + '-388.jpg');
+      }
+      return images;
+    })(),
     difficulties = [
       { d: 'leicht', n: 3, m: 4, mid: [
         [1, 1, 1],
@@ -89,13 +102,13 @@ Number.prototype.factorial = function () {
         1: indexesByValue(difficulties[2].mid, 1)
       }
     ],
-    Positions = ['pos0', 'pos1', 'pos2'],
-    nPositions = Positions.length,
-    States = ['state0', 'state1', 'state2'],
-    nStates = States.length,
     rng = new RNG(),
     puzzle, moves,
     N, M, nFields, nTurns, nCombinations;
+
+
+  if (nPositions !== nStates)
+    console.error('`nPositions` must equal `nStates`');
 
 
   function flip(x, y) {
@@ -176,8 +189,8 @@ Number.prototype.factorial = function () {
     turn(x, y);
     moves.push({ x: x, y: y });
     $('#moves').text(moves.length);
-    $('button#hint').prop('disabled', true);
-    $('button#again').prop('disabled', false);
+    $('#hint').prop('disabled', true);
+    $('#again').prop('disabled', false);
     setTimeout(checkFinished, 250);
   }
 
@@ -241,20 +254,21 @@ Number.prototype.factorial = function () {
 
 
   function newGame(difficulty, num) {
+    var i = nStates;
+    while (i--)
+      $('#solution' + i).empty();
     opts.difficulty = (typeof difficulty === 'number') ? difficulty : opts.difficulty;
     N = difficulties[opts.difficulty].n;
     M = difficulties[opts.difficulty].m;
     nFields = N * M;
     nTurns = nFields / 2;
     nCombinations = nFields.factorial() / (nTurns.factorial() * (nFields - nTurns).factorial());
-    opts.game = Math.max(0, Math.min(typeof num === 'number' ? num : Math.floor(Math.random() * nCombinations % 4294967296), 4294967296));
+    opts.game = Math.max(0, Math.min(typeof num === 'number' ? num : Math.floor(Math.random() * nCombinations % RNG.MAX_VALUE), RNG.MAX_VALUE));
     document.location.hash = $.map(opts, function (value, key) { return key + '=' + value; }).join(';');
     moves = [];
     $('#moves').text(0);
-    $('button#again').prop('disabled', true);
-    $('button#hint').prop('disabled', false);
-    $('table#solution0').empty();
-    $('table#solution1').empty();
+    $('#again').prop('disabled', true);
+    $('#hint').prop('disabled', false);
     initPuzzle();
   }
 
@@ -266,9 +280,9 @@ Number.prototype.factorial = function () {
 
 
   function preloadImages() {
-    var IMAGES = ['img/cover0-388.jpg', 'img/cover1-388.jpg', 'img/cover0-582.jpg', 'img/cover1-582.jpg'],
-      N = IMAGES.length, loaded = 0, img, i, promise = $.Deferred();
-    for (i = 0; i < N; ++i) {
+    var N = IMAGES.length, i = IMAGES.length, loaded = 0,
+      img, promise = $.Deferred();
+    while (i--) {
       img = new Image();
       img.onload = function () {
         if (++loaded === N)
@@ -281,16 +295,22 @@ Number.prototype.factorial = function () {
 
 
   function solvePuzzle() {
-    var solutions = Solver.solve(puzzle, nStates), solution, nSteps,
-      s = [$('table#solution0'), $('table#solution1')],
-      i, x, y, tr, td;
-    for (i = 0; i < solutions.length; ++i) {
+    var solutions = Solver.solve(puzzle, nStates),
+      solution, nSteps,
+      s = (function() { 
+        var sol = [], i = solutions.length;
+        while (i--)
+          sol.push($('#solution' + i));
+        return sol;
+      })(),
+      x, y, tr, td, i = solutions.length;
+    while (i--) {
       s[i].empty();
       solution = solutions[i];
       for (y = 0; y < M; ++y) {
         tr = $('<tr></tr>');
         for (x = 0; x < N; ++x)
-          tr.append($('<td></td>').text((['', 'X'])[solution[x][y]]));
+          tr.append($('<td></td>').text(solution[x][y]));
         s[i].append(tr);
       }
       nSteps = solution.reduce(function (prev, curr) { return prev.concat(curr); }).reduce(function (prev, curr, idx, arr) { return prev + curr; }, 0);
@@ -301,12 +321,11 @@ Number.prototype.factorial = function () {
 
   function playSolution() {
     var i = 0,
-      solutions = Solver.solve(puzzle),
+      solutions = Solver.solve(puzzle, nStates),
       solution = solutions[0],
       stopped = false,
-      playTimerId = null,
       flips = (function() {
-        var x, y, moves = [], n;
+        var x, y, n, moves = [];
         for (y = 0; y < M; ++y)
           for (x = 0; x < N; ++x) {
             n = solution[x][y];
@@ -316,9 +335,9 @@ Number.prototype.factorial = function () {
         return moves;
       })(),
       restoreButtons = function () {
-        $('button#solve').text('Lösen').off('click', stop).on('click', playSolution);
-        $('button#hint').prop('disabled', false);
-        $('button#new-game').prop('disabled', false);
+        $('#solve').text('Lösen').off('click', stop).on('click', playSolution);
+        $('#hint').prop('disabled', false);
+        $('#new-game').prop('disabled', false);
         $('#d-container').prop('disabled', false);
       },
       stop = function () {
@@ -331,7 +350,7 @@ Number.prototype.factorial = function () {
         if (i < flips.length) {
           turn(flips[i].x, flips[i].y);
           ++i;
-          playTimerId = setTimeout(makeTurn, 1000);
+          setTimeout(makeTurn, 1000);
         }
         else {
           restoreButtons();
@@ -339,17 +358,19 @@ Number.prototype.factorial = function () {
           newGame();
         }
       };
-    playTimerId = setTimeout(makeTurn, 250);
-    $('button#solve').text('Stopp').off('click', playSolution).on('click', stop);
-    $('button#hint').prop('disabled', true);
-    $('button#again').prop('disabled', true);
-    $('button#new-game').prop('disabled', true);
+    setTimeout(makeTurn, 250);
+    $('#solve').text('Stopp').off('click', playSolution).on('click', stop);
+    $('#hint').prop('disabled', true);
+    $('#again').prop('disabled', true);
+    $('#new-game').prop('disabled', true);
     $('#d-container').prop('disabled', true);
   }
 
 
   function init() {
-    var p;
+    var p, i = nStates;
+    while (i--)
+      $('#puzzle').after($('<table></table>').attr('id', 'solution' + i).addClass('solution'));
     if (document.location.hash.length > 1) {
       p = document.location.hash.substring(1).split(';');
       $.each(p, function (i, d) {
@@ -360,16 +381,17 @@ Number.prototype.factorial = function () {
     $.each(difficulties, function (i, d) {
       $('#d-container').append($('<option></option>').attr('value', i).text(d.d));
     });
-
     preloadImages()
       .then(function () {
-        $('button#solve').on('click', playSolution);
-        $('button#hint').on('click', solvePuzzle);
-        $('button#again').on('click', restart).prop('disabled', true);
+        $('#solve').on('click', playSolution);
+        $('#hint').on('click', solvePuzzle);
+        $('#again').on('click', restart).prop('disabled', true);
         $('#d-container').on('change', function () {
           newGame(parseInt($('#d-container').val(), 10));
         });
-        $('button#new-game').on('click', function () { newGame(parseInt($('#d-container').val(), 10)) });
+        $('#new-game').on('click', function () {
+          newGame(parseInt($('#d-container').val(), 10))
+        });
         newGame(
           typeof opts.difficulty === 'number' ? Math.min(Math.max(opts.difficulty, 0), difficulties.length - 1) : 1,
           typeof opts.game === 'number' ? opts.game : undefined

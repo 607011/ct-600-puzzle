@@ -85,6 +85,10 @@ table#solution1 {
   right: 5px;
 }
 
+table#solution2 {
+  left: 5px;
+  top: 110px;
+}
 #puzzle {
   border-collapse: collapse;
   margin: 10px auto;
@@ -153,10 +157,10 @@ table#solution1 {
   }
 
   .three-d.pos1 {
-    -moz-animation: spin-to-pos2 ease 0.5s forwards;
-    -o-animation: spin-to-pos2 ease 0.5s forwards;
-    -webkit-animation: spin-to-pos2 ease 0.5s forwards;
-    animation: spin-to-pos2 ease 0.5s forwards;
+    -moz-animation: spin-to-pos0 ease 0.5s forwards;
+    -o-animation: spin-to-pos0 ease 0.5s forwards;
+    -webkit-animation: spin-to-pos0 ease 0.5s forwards;
+    animation: spin-to-pos0 ease 0.5s forwards;
     -moz-transform: rotateY(180deg);
     -ms-transform: rotateY(180deg);
     -o-transform: rotateY(180deg);
