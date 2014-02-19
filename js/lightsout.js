@@ -45,15 +45,7 @@ Number.prototype.clamp = function (lo, hi) {
   };
 
   var opts = { game: null, difficulty: null, n: 2 },
-    MAX_STATES = 6,
-    IMAGES = (function () {
-      var images = [], i = opts.n;
-      while (i--) {
-        images.push('img/cover' + i + '-582.jpg');
-        images.push('img/cover' + i + '-388.jpg');
-      }
-      return images;
-    })(),
+    MAX_STATES = 6, RANDOMIZER = 'dumb',
     // TODO: Berechnen von `difficulties` anhand von `opts.n`
     difficulties = [
       { d: 'leicht', n: 3, m: 4, mid: [
@@ -113,17 +105,19 @@ Number.prototype.clamp = function (lo, hi) {
   function flip(x, y) {
     var i, j, cell, m;
     puzzle[x][y] = (puzzle[x][y] + 1) % opts.n;
+    console.log('flip(' + x + ',' + y + ') -> puzzle: ' + JSON.stringify(puzzle));
     for (i = 0; i < opts.n; ++i) {
       cell = $('#pos' + i + '-' + x + '-' + y);
       if (cell.length === 0)
         continue;
       m = cell.attr('class').match(/pos(\d+)/);
-      cell.addClass('pos' + ((parseInt(m[1], 10) + 1) % opts.n)).removeClass(m[0]);
+      cell.removeClass(m[0]).addClass('pos' + ((parseInt(m[1], 10) + 1) % opts.n));
     }
   }
 
 
   function turn(x, y) {
+    console.log('turn(' + x + ',' + y + ')');
     flip(x, y);
     if (y > 0)     flip(x, y - 1);
     if (y + 1 < M) flip(x, y + 1);
@@ -225,31 +219,51 @@ Number.prototype.clamp = function (lo, hi) {
     for (x = 0; x < N; ++x) {
       puzzle[x] = new Array(M);
       for (y = 0; y < M; ++y)
-        puzzle[x][y] = 1;
+        puzzle[x][y] = 0;
     }
   }
 
 
   function initPuzzle() {
-    var i, f, selected, ones, zeros, nOnes, nZeros;
+    var i, f, selected, solution, ones, zeros, nOnes, nZeros;
     clearPuzzle();
     rng.seed(opts.game);
     $('#game-number').text(opts.game);
-    // TODO: Berechnen des Startzustandes anhand von `opts.n`
-    ones = middle[opts.difficulty][0].slice(0);  // clone
-    zeros = middle[opts.difficulty][1].slice(0); // clone
-    // discard half of the ones
-    nOnes = ones.length / 2;
-    while (ones.length > nOnes)
-      ones.splice(rng.next() % ones.length, 1);
-    // discard zeros
-    nZeros = nTurns - nOnes;
-    while (zeros.length > nZeros)
-      zeros.splice(rng.next() % zeros.length, 1);
-    selected = ones.concat(zeros);
-    for (i = 0; i < selected.length; ++i) {
-      f = selected[i];
-      turn(f % N,  Math.floor(f / N));
+    switch (RANDOMIZER) {
+      case 'bo':
+        // TODO: Berechnen des Startzustandes anhand von `opts.n`
+        ones = middle[opts.difficulty][0].slice(0);  // clone
+        zeros = middle[opts.difficulty][1].slice(0); // clone
+        // discard half of the ones
+        nOnes = ones.length / 2;
+        while (ones.length > nOnes)
+          ones.splice(rng.next() % ones.length, 1);
+        // discard zeros
+        nZeros = nTurns - nOnes;
+        while (zeros.length > nZeros)
+          zeros.splice(rng.next() % zeros.length, 1);
+        selected = ones.concat(zeros);
+        for (i = 0; i < selected.length; ++i) {
+          f = selected[i];
+          turn(f % N, Math.floor(f / N));
+        }
+        break;
+      case 'dumb':
+        i = nTurns;
+        selected = [];
+        solution = [];
+        while (i > 0) {
+          f = rng.next() % nFields;
+          if (selected.indexOf(f) < 0) {
+            selected.push(f);
+            turn(f % N, Math.floor(f / N));
+            solution.push([f % N, Math.floor(f / N)])
+            --i;
+          }
+        }
+        console.log(JSON.stringify(solution));
+        console.log('puzzle: ' + JSON.stringify(puzzle));
+        break;
     }
     drawPuzzle();
   }
@@ -282,13 +296,24 @@ Number.prototype.clamp = function (lo, hi) {
 
 
   function preloadImages() {
-    var N = IMAGES.length, i = IMAGES.length, loaded = 0,
-      img, promise = $.Deferred();
+    var IMAGES = (function () {
+      var images = [], i = opts.n;
+      while (i--) {
+        images.push('img/cover' + i + '-582.jpg');
+        images.push('img/cover' + i + '-388.jpg');
+      }
+      return images;
+    })(),
+    N = IMAGES.length, i = IMAGES.length,
+    loaded = 0, img, promise = $.Deferred();
     while (i--) {
       img = new Image();
       img.onload = function () {
         if (++loaded === N)
           promise.resolve();
+      };
+      img.onerror = function (e) {
+        console.error('image not found');
       };
       img.src = IMAGES[i];
     }
