@@ -228,41 +228,37 @@ Number.prototype.clamp = function (lo, hi) {
     clearPuzzle();
     rng.seed(opts.game);
     $('#game-number').text(opts.game);
-    switch (RANDOMIZER) {
-      case 'bo':
-        // TODO: Berechnen des Startzustandes anhand von `opts.n`
-        ones = middle[opts.difficulty][0].slice(0);  // clone
-        zeros = middle[opts.difficulty][1].slice(0); // clone
-        // discard half of the ones
-        nOnes = ones.length / 2;
-        while (ones.length > nOnes)
-          ones.splice(rng.next() % ones.length, 1);
-        // discard zeros
-        nZeros = nTurns - nOnes;
-        while (zeros.length > nZeros)
-          zeros.splice(rng.next() % zeros.length, 1);
-        selected = ones.concat(zeros);
-        for (i = 0; i < selected.length; ++i) {
-          f = selected[i];
+    if (opts.n === 2) {
+      // TODO: Berechnen des Startzustandes anhand von `opts.n`
+      ones = middle[opts.difficulty][0].slice(0);  // clone
+      zeros = middle[opts.difficulty][1].slice(0); // clone
+      // discard half of the ones
+      nOnes = ones.length / 2;
+      while (ones.length > nOnes)
+        ones.splice(rng.next() % ones.length, 1);
+      // discard zeros
+      nZeros = nTurns - nOnes;
+      while (zeros.length > nZeros)
+        zeros.splice(rng.next() % zeros.length, 1);
+      selected = ones.concat(zeros);
+      for (i = 0; i < selected.length; ++i) {
+        f = selected[i];
+        turn(f % N, Math.floor(f / N));
+      }
+    }
+    else {
+      i = nTurns;
+      selected = [];
+      solution = [];
+      while (i > 0) {
+        f = rng.next() % nFields;
+        if (selected.indexOf(f) < 0) {
+          selected.push(f);
           turn(f % N, Math.floor(f / N));
+          solution.push([f % N, Math.floor(f / N)])
+          --i;
         }
-        break;
-      case 'dumb':
-        i = nTurns;
-        selected = [];
-        solution = [];
-        while (i > 0) {
-          f = rng.next() % nFields;
-          if (selected.indexOf(f) < 0) {
-            selected.push(f);
-            turn(f % N, Math.floor(f / N));
-            solution.push([f % N, Math.floor(f / N)])
-            --i;
-          }
-        }
-        console.log(JSON.stringify(solution));
-        console.log('puzzle: ' + JSON.stringify(puzzle));
-        break;
+      }
     }
     drawPuzzle();
   }
