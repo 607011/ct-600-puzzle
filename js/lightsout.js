@@ -184,7 +184,6 @@ Number.prototype.clamp = function (lo, hi) {
     turn(x, y);
     moves.push({ x: x, y: y });
     $('#moves').text(moves.length);
-    $('#hint').prop('disabled', true);
     $('#again').prop('disabled', false);
     setTimeout(checkFinished, 250);
   }
