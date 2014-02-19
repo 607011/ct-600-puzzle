@@ -204,7 +204,7 @@ Number.prototype.clamp = function (lo, hi) {
             .addClass('three-d')
             .attr('id', 'pos' + i + '-' + x + '-' + y)
             .addClass('pos' + i)
-            .addClass('state' + (puzzle[x][y] + i) % opts.n));
+            .addClass('state' + (opts.n - puzzle[x][y] + i) % opts.n));
         }
         p.append(cell);
       }
