@@ -105,7 +105,6 @@ Number.prototype.clamp = function (lo, hi) {
   function flip(x, y) {
     var i, j, cell, m;
     puzzle[x][y] = (puzzle[x][y] + 1) % opts.n;
-    console.log('flip(' + x + ',' + y + ') -> puzzle: ' + JSON.stringify(puzzle));
     for (i = 0; i < opts.n; ++i) {
       cell = $('#pos' + i + '-' + x + '-' + y);
       if (cell.length === 0)
@@ -117,7 +116,6 @@ Number.prototype.clamp = function (lo, hi) {
 
 
   function turn(x, y) {
-    console.log('turn(' + x + ',' + y + ')');
     flip(x, y);
     if (y > 0)     flip(x, y - 1);
     if (y + 1 < M) flip(x, y + 1);
