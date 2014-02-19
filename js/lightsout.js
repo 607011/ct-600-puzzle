@@ -423,17 +423,7 @@ Number.prototype.clamp = function (lo, hi) {
         $('#d-container').val(opts.difficulty);
         $(window).resize(resize).trigger('resize');
         (function generateStyles () {
-          var i, ii, deg, r, styles = '', n = opts.n, a = cellW;
-          switch (n) {
-            case 0: /* fall-through */
-            case 1: console.error('Are you kidding me?'); return;
-            case 2: r = 0; break;
-            case 3: r = a / 6 * Math.sqrt(3); break;
-            case 4: r = a / 2; break;
-            case 5: r = a / 10 * Math.sqrt(25 + 10 * Math.sqrt(5)); break;
-            case 6: r = a * Math.sqrt(3) / 2; break;
-            default: console.error(n + '-hedrons not implemented.'); return;
-          }
+          var i, ii, deg, styles = '', n = opts.n, a = cellW, r = a / (2 * Math.tan(360 / n));
           for (i = 0; i < n; ++i) {
             ii = (i + 1) % n;
             deg = [i * 360 / n, (i + 1) * 360 / n];
