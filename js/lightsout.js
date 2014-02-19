@@ -417,9 +417,11 @@ Number.prototype.clamp = function (lo, hi) {
         $('#d-container').val(opts.difficulty);
         $(window).on('resize', resize).trigger('resize');
         (function generateStyles () {
-          var i, ii, deg1, deg2, styles = '', n = opts.n, a = cellW, r = (n > 2) ? a / (2 * Math.tan(Math.PI / n)) : 0,
-            t1 = (n > 2) ? ('translateZ(' + (-r) + 'px) ') : '',
-            t2 = (n > 2) ? (' translateZ(' + r + 'px)') : '';
+          var i, ii, styles = '',
+            n = opts.n, a = cellW, deg1, deg2,
+            r = (n > 2) ? a / (2 * Math.tan(Math.PI / n)) : 0,
+            t1 = (n > 2) ? ('translateZ(' + (-r) + 'px)') : '',
+            t2 = (n > 2) ? ('translateZ(' + r + 'px)') : '';
           for (i = 0; i < n; ++i) {
             ii = (i + 1) % n;
             deg1 = i * 360 / n;
