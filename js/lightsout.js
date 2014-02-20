@@ -165,7 +165,7 @@ Array.prototype.clone = function () {
     th = cellH + 'px';
     for (i = 0; i < opts.n; ++i)
       $('.pos' + i).css('width', tw).css('height', th);
-    cells.css('width', tw).css('height', th);
+    cells.css('width', tw).css('height', th).css('overflow', opts.n > 4 ? 'hidden' : 'visible');
     for (y = 0; y < M; ++y) {
       for (x = 0; x < N; ++x) {
         left = x * cellW;
@@ -411,7 +411,6 @@ Array.prototype.clone = function () {
         $('#puzzle').after($('<table></table>').attr('id', 'solution'));
         $(window).on('resize', resize);
         resize();
-        $('.cell').css('overflow', opts.n > 4 ? 'hidden' : 'visible');
         (function generateStyles () {
           var i, ii, styles = '',
             n = opts.n, a = cellW, deg1, deg2,
