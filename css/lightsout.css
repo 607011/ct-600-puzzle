@@ -57,6 +57,7 @@ html, body {
   background-color: rgba(47, 50, 51, 0.6);
   box-shadow: rgba(47, 50, 51, 0.6) 0px 0px 6px;
   display: none;
+  cursor: default;
 }
 
   #solution td {
@@ -96,7 +97,6 @@ html, body {
   position: absolute;
   cursor: pointer;
   display: inline-block;
-  overflow: visible;
 }
 
 .three-d {

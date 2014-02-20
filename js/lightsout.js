@@ -27,6 +27,10 @@ Number.prototype.clamp = function (lo, hi) {
   return Math.min(Math.max(this, lo), hi);
 };
 
+Array.prototype.clone = function () {
+  return this.slice(0);
+};
+
 (function () {
   "use strict";
   var RNG = function (seed) {
@@ -229,9 +233,8 @@ Number.prototype.clamp = function (lo, hi) {
     rng.seed(opts.game);
     $('#game-number').text(opts.game);
     if (opts.n === 2) {
-      // TODO: Berechnen des Startzustandes anhand von `opts.n`
-      ones = middle[opts.difficulty][0].slice(0);  // clone
-      zeros = middle[opts.difficulty][1].slice(0); // clone
+      ones = middle[opts.difficulty][0].clone();
+      zeros = middle[opts.difficulty][1].clone();
       // discard half of the ones
       nOnes = ones.length / 2;
       while (ones.length > nOnes)
@@ -266,7 +269,7 @@ Number.prototype.clamp = function (lo, hi) {
     nFields = N * M;
     nTurns = nFields / 2;
     nCombinations = nFields.factorial() / (nTurns.factorial() * (nFields - nTurns).factorial());
-    opts.game = Math.max(0, Math.min(typeof num === 'number' ? num : Math.floor(Math.random() * nCombinations % RNG.MAX_VALUE), RNG.MAX_VALUE));
+    opts.game = (typeof num === 'number') ? num : Math.floor(Math.random() * nCombinations % RNG.MAX_VALUE);
     document.location.hash = $.map(opts, function (value, key) { return key + '=' + value; }).join(';');
     moves = [];
     $('#moves').text(0);
@@ -408,6 +411,7 @@ Number.prototype.clamp = function (lo, hi) {
         $('#puzzle').after($('<table></table>').attr('id', 'solution'));
         $(window).on('resize', resize);
         resize();
+        $('.cell').css('overflow', opts.n > 4 ? 'hidden' : 'visible');
         (function generateStyles () {
           var i, ii, styles = '',
             n = opts.n, a = cellW, deg1, deg2,
