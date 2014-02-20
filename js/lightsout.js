@@ -224,7 +224,7 @@ Number.prototype.clamp = function (lo, hi) {
 
 
   function initPuzzle() {
-    var i, f, selected, solution, ones, zeros, nOnes, nZeros;
+    var i, f, selected, ones, zeros, nOnes, nZeros;
     clearPuzzle();
     rng.seed(opts.game);
     $('#game-number').text(opts.game);
@@ -248,16 +248,9 @@ Number.prototype.clamp = function (lo, hi) {
     }
     else {
       i = nTurns;
-      selected = [];
-      solution = [];
-      while (i > 0) {
+      while (i-- > 0) {
         f = rng.next() % nFields;
-        if (selected.indexOf(f) < 0) {
-          selected.push(f);
-          turn(f % N, Math.floor(f / N));
-          solution.push([f % N, Math.floor(f / N)])
-          --i;
-        }
+        turn(f % N, Math.floor(f / N));
       }
     }
     drawPuzzle();
