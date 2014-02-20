@@ -415,7 +415,8 @@ Number.prototype.clamp = function (lo, hi) {
           typeof opts.game === 'number' ? opts.game.clamp(0, RNG.MAX_VALUE) : undefined
         );
         $('#d-container').val(opts.difficulty);
-        $(window).on('resize', resize).trigger('resize');
+        $(window).on('resize', resize);
+        resize();
         (function generateStyles () {
           var i, ii, styles = '',
             n = opts.n, a = cellW, deg1, deg2,
