@@ -65,7 +65,11 @@ html, body {
     width: 1em;
     height: 1em;
     vertical-align: middle;
-    font-size: smaller;
+    font-size: 11px;
+  }
+
+  #solution td.steps {
+    background-color: rgb(78, 84, 86);
   }
 
 #puzzle {
@@ -197,5 +201,9 @@ dd {
 
   footer {
     max-width: 274px;
+  }
+
+  #solution td {
+    font-size: 8px;
   }
 }

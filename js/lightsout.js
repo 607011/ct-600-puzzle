@@ -323,11 +323,11 @@ Number.prototype.clamp = function (lo, hi) {
     while (i--) {
       solution = solutions[i];
       nSteps = solution.reduce(function (prev, curr) { return prev.concat(curr); }).reduce(function (prev, curr, idx, arr) { return prev + curr; }, 0);
-      table.append($('<tr></tr>').append($('<td></td>').attr('colspan', N).text(nSteps)));
+      table.append($('<tr></tr>').append($('<td title="Schritte zur Lösung"></td>').attr('colspan', N).addClass('steps').text(nSteps)));
       for (y = 0; y < M; ++y) {
         tr = $('<tr></tr>');
         for (x = 0; x < N; ++x)
-          tr.append($('<td></td>').text(solution[x][y]));
+          tr.append($('<td></td>').text(solution[x][y]).attr('title', x + ',' + y));
         table.append(tr);
       }
     }
