@@ -184,6 +184,8 @@ Number.prototype.clamp = function (lo, hi) {
     $('#moves').text(moves.length);
     $('#again').prop('disabled', false);
     setTimeout(checkFinished, 250);
+    if ($('#solution').css('display') === 'block')
+      solvePuzzle();
   }
 
 
@@ -264,7 +266,7 @@ Number.prototype.clamp = function (lo, hi) {
 
   function newGame(difficulty, num) {
     var i = opts.n;
-    $('#solution').empty();
+    $('#solution').empty().css('display', 'none');
     opts.difficulty = (typeof difficulty === 'number') ? difficulty : opts.difficulty;
     N = difficulties[opts.difficulty].n;
     M = difficulties[opts.difficulty].m;
@@ -317,7 +319,7 @@ Number.prototype.clamp = function (lo, hi) {
     var solutions = Solver.solve(puzzle, opts.n),
       solution, nSteps, table = $('#solution'),
       x, y, tr, td, i = solutions.length;
-    table.empty();
+    table.empty().css('display', 'block');
     while (i--) {
       solution = solutions[i];
       nSteps = solution.reduce(function (prev, curr) { return prev.concat(curr); }).reduce(function (prev, curr, idx, arr) { return prev + curr; }, 0);
@@ -363,6 +365,8 @@ Number.prototype.clamp = function (lo, hi) {
         if (i < flips.length) {
           turn(flips[i].x, flips[i].y);
           ++i;
+          if ($('#solution').css('display') === 'block')
+            solvePuzzle();
           setTimeout(makeTurn, 1000);
         }
         else {
@@ -422,7 +426,6 @@ Number.prototype.clamp = function (lo, hi) {
             deg1 = i * 360 / n;
             deg2 = (i + 1) * 360 / n;
             styles += '\n'
-              + '#solution' + i + ' { left: 0; top: ' + (i * 100) /* XXX: bad for large puzzles */ + 'px; }\n'
               + '.state' + i + ' { background-image: url("img/cover' + i + '-582.jpg"); }\n'
               + '@media screen and (max-width: 480px) { .state' + i + ' { background-image: url("img/cover' + i + '-388.jpg"); } }\n'
               + '.pos' + i + ' {\n'
