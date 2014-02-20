@@ -1,9 +1,8 @@
-// TODO: Solver spuckt falsche Lösungen aus für NUM_STATES > 2 ???
+/// Original solver by Norio Kato, http://www.ueda.info.waseda.ac.jp/~n-kato/lightsout/ 
+/// Modified 2014 by Oliver Lau <ola@ct.de>
 
 var Solver = (function () {
   "use strict";
-  /// Original solver by Norio Kato, http://www.ueda.info.waseda.ac.jp/~n-kato/lightsout/ 
-  /// Modified 2014 by Oliver Lau <ola@ct.de>
   var mat,        // integer[i][j]
     cols,         // integer[]
     m,            // count of rows of the matrix
@@ -70,11 +69,11 @@ var Solver = (function () {
   function initMatrix() {
     var x, y, i, j, line;
     maxr = Math.min(m, n);
-    mat = new Array();
+    mat = [];
     for (x = 0; x < N; ++x)
       for (y = 0; y < M; ++y) {
         i = y * N + x;
-        line = new Array();
+        line = [];
         mat[i] = line;
         for (j = 0; j < n; ++j)
           line[j] = 0;
@@ -88,7 +87,7 @@ var Solver = (function () {
         if (y < M - 1)
           line[i + N] = 1;
       }
-    cols = new Array();
+    cols = [];
     for (j = 0; j < np; ++j)
       cols[j] = j;
   }
@@ -135,7 +134,7 @@ var Solver = (function () {
       maxr = r;
       for (j = n; j < np; ++j)
         for (i = r; i < m; ++i)
-          if (a(i, j) != 0)
+          if (a(i, j) !== 0)
             return false;
       return true;
     }
@@ -156,7 +155,7 @@ var Solver = (function () {
       swap(cols, r, pivotj);
     for (i = 0; i < m; ++i) {
       if (i !== r) {
-        var air = a(i, r);
+        air = a(i, r);
         if (air !== 0)
           for (j = r; j < np; ++j)
             setmat(i, j, a(i, j) - a(r, j) * air);
@@ -170,7 +169,7 @@ var Solver = (function () {
       for (i = 0; i < N; ++i)
         solution[i] = new Array(M);
       if (solvedProblem(goal)) {
-        anscols = new Array();
+        anscols = [];
         for (j = 0; j < n; ++j)
           anscols[cols[j]] = j;
         for (x = 0; x < N; ++x) {
@@ -191,5 +190,5 @@ var Solver = (function () {
       nStates = states;
       return solved();
     }
-  }
+  };
 })();

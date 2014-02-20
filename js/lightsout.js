@@ -16,6 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/* extern */ var Solver;
+
 Number.prototype.factorial = function () {
   var x = 1, i;
   for (i = 2; i <= this; ++i)
@@ -30,6 +32,7 @@ Number.prototype.clamp = function (lo, hi) {
 Array.prototype.clone = function () {
   return this.slice(0);
 };
+
 
 (function () {
   "use strict";
@@ -296,15 +299,17 @@ Array.prototype.clone = function () {
     })(),
     N = IMAGES.length, i = IMAGES.length,
     loaded = 0, img, promise = $.Deferred();
+    function checkLoaded() {
+      if (++loaded === N)
+        promise.resolve();
+    }
+    function error() {
+      console.error('image not found');
+    }
     while (i--) {
       img = new Image();
-      img.onload = function () {
-        if (++loaded === N)
-          promise.resolve();
-      };
-      img.onerror = function (e) {
-        console.error('image not found');
-      };
+      img.onload = checkLoaded;
+      img.onerror = error;
       img.src = IMAGES[i];
     }
     return promise;
@@ -316,9 +321,15 @@ Array.prototype.clone = function () {
       solution, nSteps, table = $('#solution'),
       x, y, tr, td, i = solutions.length;
     table.empty().css('display', 'block');
+    function concatenate(prev, curr) {
+      return prev.concat(curr);
+    }
+    function summarize(prev, curr) {
+      return prev + curr;
+    }
     while (i--) {
       solution = solutions[i];
-      nSteps = solution.reduce(function (prev, curr) { return prev.concat(curr); }).reduce(function (prev, curr, idx, arr) { return prev + curr; }, 0);
+      nSteps = solution.reduce(concatenate).reduce(summarize, 0);
       table.append($('<tr></tr>').append($('<td title="Schritte zur Lösung"></td>').attr('colspan', N).addClass('steps').text(nSteps)));
       for (y = 0; y < M; ++y) {
         tr = $('<tr></tr>');
@@ -401,7 +412,7 @@ Array.prototype.clone = function () {
           newGame(parseInt($('#d-container').val(), 10));
         });
         $('#new-game').on('click', function () {
-          newGame(parseInt($('#d-container').val(), 10))
+          newGame(parseInt($('#d-container').val(), 10));
         });
         newGame(
           typeof opts.difficulty === 'number' ? opts.difficulty.clamp(0, difficulties.length - 1) : 1,
