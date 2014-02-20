@@ -264,8 +264,7 @@ Number.prototype.clamp = function (lo, hi) {
 
   function newGame(difficulty, num) {
     var i = opts.n;
-    while (i--)
-      $('#solution' + i).empty();
+    $('#solution').empty();
     opts.difficulty = (typeof difficulty === 'number') ? difficulty : opts.difficulty;
     N = difficulties[opts.difficulty].n;
     M = difficulties[opts.difficulty].m;
@@ -316,25 +315,19 @@ Number.prototype.clamp = function (lo, hi) {
 
   function solvePuzzle() {
     var solutions = Solver.solve(puzzle, opts.n),
-      solution, nSteps,
-      s = (function() { 
-        var sol = [], i = solutions.length;
-        while (i--)
-          sol.push($('#solution' + i));
-        return sol;
-      })(),
+      solution, nSteps, table = $('#solution'),
       x, y, tr, td, i = solutions.length;
+    table.empty();
     while (i--) {
-      s[i].empty();
       solution = solutions[i];
+      nSteps = solution.reduce(function (prev, curr) { return prev.concat(curr); }).reduce(function (prev, curr, idx, arr) { return prev + curr; }, 0);
+      table.append($('<tr></tr>').append($('<td></td>').attr('colspan', N).text(nSteps)));
       for (y = 0; y < M; ++y) {
         tr = $('<tr></tr>');
         for (x = 0; x < N; ++x)
           tr.append($('<td></td>').text(solution[x][y]));
-        s[i].append(tr);
+        table.append(tr);
       }
-      nSteps = solution.reduce(function (prev, curr) { return prev.concat(curr); }).reduce(function (prev, curr, idx, arr) { return prev + curr; }, 0);
-      s[i].prepend($('<thead></thead>').append($('<tr></tr>').append($('<td></td>').attr('colspan', N).text(nSteps))));
     }
   }
 
@@ -415,6 +408,7 @@ Number.prototype.clamp = function (lo, hi) {
           typeof opts.game === 'number' ? opts.game.clamp(0, RNG.MAX_VALUE) : undefined
         );
         $('#d-container').val(opts.difficulty);
+        $('#puzzle').after($('<table></table>').attr('id', 'solution'));
         $(window).on('resize', resize);
         resize();
         (function generateStyles () {
@@ -427,7 +421,6 @@ Number.prototype.clamp = function (lo, hi) {
             ii = (i + 1) % n;
             deg1 = i * 360 / n;
             deg2 = (i + 1) * 360 / n;
-            $('#puzzle').after($('<table class="solution"></table>').attr('id', 'solution' + i));
             styles += '\n'
               + '#solution' + i + ' { left: 0; top: ' + (i * 100) /* XXX: bad for large puzzles */ + 'px; }\n'
               + '.state' + i + ' { background-image: url("img/cover' + i + '-582.jpg"); }\n'

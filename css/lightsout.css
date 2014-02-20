@@ -49,7 +49,7 @@ html, body {
   display: block;
 }
 
-table.solution {
+#solution {
   position: absolute;
   top: 5px;
   border-collapse: collapse;
@@ -59,7 +59,7 @@ table.solution {
   display: inline-block;
 }
 
-  table.solution td {
+  #solution td {
     text-align: center;
     border: 1px solid #111;
     width: 1em;
