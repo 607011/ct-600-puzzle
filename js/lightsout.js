@@ -69,27 +69,49 @@ Number.prototype.factorial = function () {
 
 
   function checkFinished() {
+    var form;
     if (allTheSame()) {
-      $.ajax({
-        url: 'ajax/solved.php',
-        accepts: 'json',
-        type: 'POST',
-        data: {
-          game: opts.game,
-          difficulty: opts.difficulty,
-          moves: JSON.stringify(moves)
-        }
-      }).done(function (data) {
-        if (data) {
-          if (data.status === 'ok') {
-            alert('Juhuuu! Du hast das Puzzle mit ' + moves.length + ' Zügen gelöst!');
+      if (true) {
+        $.ajax({
+          url: 'ajax/solved.php',
+          accepts: 'json',
+          type: 'POST',
+          data: {
+            game: opts.game,
+            difficulty: opts.difficulty,
+            moves: JSON.stringify(moves)
           }
-          else {
-            alert('Das war wohl nix. Nächster Versuch ...');
-            newGame();
+        }).done(function (data) {
+          if (data) {
+            if (data.status === 'ok') {
+              alert('Juhuuu! Du hast das Puzzle mit ' + moves.length + ' Zügen gelöst!');
+            }
+            else {
+              alert('Das war wohl nix. Nächster Versuch ...');
+              newGame();
+            }
           }
-        }
-      });
+        });
+      }
+      else {
+        form = $('<form></form>')
+          .attr('action', 'checkmoves.php')
+          .attr('method', 'POST')
+          .append($('<input></input>')
+            .attr('type', 'text')
+            .attr('name', 'game')
+            .val(opts.game))
+          .append($('<input></input>')
+            .attr('type', 'text')
+            .attr('name', 'difficulty')
+            .val(opts.difficulty))
+          .append($('<input></input>')
+            .attr('type', 'text')
+            .attr('name', 'moves')
+            .val(JSON.stringify(moves)))
+        $('body').append(form);
+        form.submit();
+      }
     }
   }
 
