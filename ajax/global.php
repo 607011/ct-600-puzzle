@@ -81,9 +81,8 @@ function generatePuzzle($game, $difficulty) {
 }
 
 
-function verifyPuzzle($game, $difficulty, $moves) {
+function puzzleSolved($game, $difficulty, $moves) {
     generatePuzzle($game, $difficulty);
-    // play solution
     foreach($moves as $f)
         turn($f[0], $f[1]);
     return allTheSame();

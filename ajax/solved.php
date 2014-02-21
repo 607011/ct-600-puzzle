@@ -6,7 +6,7 @@ if (isset($_REQUEST['game']) && isset($_REQUEST['difficulty']) && isset($_REQUES
     $game = intval($_REQUEST['game']);
     $difficulty = intval($_REQUEST['difficulty']);
     $moves = json_decode($_REQUEST['moves'], true);
-    $ok = verifyPuzzle($game, $difficulty, $moves);
+    $ok = puzzleSolved($game, $difficulty, $moves);
     $result = array(
         'status' => ($ok ? 'ok' : 'wrong'),
         'difficulty' => $difficulty,
