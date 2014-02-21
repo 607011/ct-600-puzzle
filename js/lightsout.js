@@ -321,20 +321,22 @@ Array.prototype.clone = function () {
       solution, nSteps, table = $('#solution'),
       x, y, tr, td, i = solutions.length;
     table.empty().css('display', 'block');
-    function concatenate(prev, curr) {
-      return prev.concat(curr);
-    }
-    function summarize(prev, curr) {
-      return prev + curr;
-    }
+    function concatenate(p, c) { return p.concat(c); }
+    function summarize(p, c) { return p + c; }
     while (i--) {
       solution = solutions[i];
       nSteps = solution.reduce(concatenate).reduce(summarize, 0);
-      table.append($('<tr></tr>').append($('<td title="Schritte zur Lösung"></td>').attr('colspan', N).addClass('steps').text(nSteps)));
+      tr = $('<tr></tr>')
+        .append($('<td title="Schritte zur Lösung"></td>')
+        .attr('colspan', N)
+        .addClass('steps')
+        .text(nSteps));
+      table.append(tr);
       for (y = 0; y < M; ++y) {
         tr = $('<tr></tr>');
         for (x = 0; x < N; ++x)
-          tr.append($('<td></td>').text(solution[x][y]).attr('title', x + ',' + y));
+          tr.append($('<td></td>')
+            .text(solution[x][y]).attr('title', x + ',' + y));
         table.append(tr);
       }
     }
