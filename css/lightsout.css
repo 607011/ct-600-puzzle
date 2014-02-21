@@ -49,30 +49,6 @@ html, body {
   display: block;
 }
 
-#solution {
-  position: absolute;
-  top: 2px;
-  left: 5px;
-  border-collapse: collapse;
-  background-color: rgba(47, 50, 51, 0.6);
-  box-shadow: rgba(47, 50, 51, 0.6) 0px 0px 6px;
-  display: none;
-  cursor: default;
-}
-
-  #solution td {
-    text-align: center;
-    border: 1px solid #111;
-    width: 1em;
-    height: 1em;
-    vertical-align: middle;
-    font-size: 11px;
-  }
-
-  #solution td.steps {
-    background-color: rgb(78, 84, 86);
-  }
-
 #puzzle {
   border-collapse: collapse;
   margin: 10px auto;

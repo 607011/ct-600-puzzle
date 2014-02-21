@@ -70,8 +70,26 @@ Number.prototype.factorial = function () {
 
   function checkFinished() {
     if (allTheSame()) {
-      alert('Juhuuu! Du hast das Puzzle mit ' + moves.length + ' Zügen gelöst!');
-      newGame();
+      $.ajax({
+        url: 'ajax/solved.php',
+        accepts: 'json',
+        type: 'POST',
+        data: {
+          game: opts.game,
+          difficulty: opts.difficulty,
+          moves: JSON.stringify(moves)
+        }
+      }).done(function (data) {
+        if (data) {
+          if (data.status === 'ok') {
+            alert('Juhuuu! Du hast das Puzzle mit ' + moves.length + ' Zügen gelöst!');
+          }
+          else {
+            alert('Das war wohl nix. Nächster Versuch ...');
+            newGame();
+          }
+        }
+      });
     }
   }
 
@@ -112,7 +130,7 @@ Number.prototype.factorial = function () {
 
   function clickTile(x, y) {
     turn(x, y);
-    moves.push({ x: x, y: y });
+    moves.push([x, y]);
     $('#moves').text(moves.length);
     $('#again').prop('disabled', false);
     checkFinished();
@@ -144,35 +162,38 @@ Number.prototype.factorial = function () {
   function loadPuzzle(game) {
     $.ajax({
       url: 'ajax/puzzle.php',
-      type: 'GET',
+      type: 'POST',
       accepts: 'json',
       data: {
         game: game,
         difficulty: opts.difficulty
       }
     }).done(function (data) {
-      opts.game = data.game;
-      puzzle = data.puzzle;
-      $('#game-number').text(opts.game);
-      drawPuzzle();
+      if (typeof data === 'object' && typeof data.puzzle === 'object' && typeof data.game === 'number') {
+        opts.game = data.game;
+        puzzle = data.puzzle;
+        $('#game-number').text(opts.game);
+        $('#puzzle .loader').remove();
+        drawPuzzle();
+      }
     }).error(function (e) {
-      console.log(e);
+      console.error(e);
     });
   }
 
 
   function newGame(game) {
-    opts.game = (typeof game === 'number') ? game : Math.floor(Math.random() * nCombinations);
     opts.difficulty = parseInt($('#d-container').val(), 10);
     N = difficulties[opts.difficulty].n;
     M = difficulties[opts.difficulty].m;
     nFields = N * M;
     nTurns = nFields / 2;
-    nCombinations = nFields.factorial() / (nTurns.factorial() * (nFields - nTurns).factorial());    moves = [];
+    nCombinations = nFields.factorial() / (nTurns.factorial() * (nFields - nTurns).factorial());    opts.game = (typeof game === 'number') ? game : Math.floor(Math.random() * nCombinations);
+    moves = [];
     $('#moves').text(0);
     $('#again').prop('disabled', true);
     $('#puzzle').empty().append($('<span class="loader"></span>'));
-    loadPuzzle();
+    loadPuzzle(opts.game);
   }
 
 
@@ -197,13 +218,9 @@ Number.prototype.factorial = function () {
       if (++loaded === N)
         promise.resolve();
     }
-    function error() {
-      console.error('image not found');
-    }
     while (i--) {
       img = new Image();
       img.onload = checkLoaded;
-      img.onerror = error;
       img.src = IMAGES[i];
     }
     return promise;
@@ -217,16 +234,9 @@ Number.prototype.factorial = function () {
     preloadImages()
       .then(function () {
         $('#again').on('click', restart).prop('disabled', true);
-        $('#d-container').on('change', function () {
-          newGame(parseInt($('#d-container').val(), 10));
-        });
-        $('#new-game').on('click', function () {
-          newGame(parseInt($('#d-container').val(), 10));
-        });
-        newGame(typeof opts.difficulty === 'number' ? opts.difficulty.clamp(0, difficulties.length - 1) : 1);
-        $('#d-container').val(opts.difficulty);
-        $(window).on('resize', resize);
-        resize();
+        $('#d-container').on('change', function () { newGame(); }).val(1);
+        $('#new-game').on('click', function () { newGame(); });
+        newGame();
         (function generateStyles () {
           var i, ii, styles = '',
             n = opts.n, a = cellW, deg1, deg2,
@@ -284,6 +294,8 @@ Number.prototype.factorial = function () {
               + '}\n';
           }
           $('head').append($('<style type="text/css"></style>').text(styles));
+          $(window).on('resize', resize);
+          resize();
         })();
       });
   }
