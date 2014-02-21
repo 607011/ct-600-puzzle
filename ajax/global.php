@@ -1,75 +1,21 @@
 <?php
 
-$easy = array("d" => 'leicht', "n" => 3, "m" => 4,
-  "mid" => array(
-        array(1, 1, 1),
-        array(1, 0, 1),
-        array(1, 0, 1),
-        array(1, 1, 1)
-    )
-);
-$hard = array("d" => 'schwer', "n" => 4, "m" => 5,
-  "mid" => array(
-        array(0, 0, 0, 0),
-        array(1, 1, 1, 1),
-        array(1, 0, 0, 1),
-        array(1, 1, 1, 1),
-        array(0, 0, 0, 0)
-    )
-);
-$extreme = array("d" => 'extrem', "n" => 7, "m" => 10,
-  "mid" => array(
-        array(1, 1, 1, 1, 1, 1, 1),
-        array(1, 0, 0, 0, 0, 0, 1),
-        array(1, 1, 0, 0, 0, 1, 1),
-        array(0, 1, 0, 1, 0, 1, 0),
-        array(1, 1, 1, 0, 1, 1, 1),
-        array(1, 1, 1, 0, 1, 1, 1),
-        array(0, 1, 0, 1, 0, 1, 0),
-        array(1, 1, 0, 0, 0, 1, 1),
-        array(1, 0, 0, 0, 0, 0, 1),
-        array(1, 1, 1, 1, 1, 1, 1)
-    )
-);
+$easy = array("n" => 3, "m" => 4, "middle" => array(
+    array(4,7),
+    array(0,1,2,3,5,6,8,9,10,11)
+  ));
+$hard = array("n" => 4, "m" => 5, "middle" => array(
+    array(0,1,2,3,9,10,16,17,18,19),
+    array(4,5,6,7,8,11,12,13,14,15)
+  ));
+$extreme = array("n" => 7, "m" => 10, "middle" => array(
+    array(8,9,10,11,12,16,17,18,21,23,25,27,31,38,42,44,46,48,51,52,53,57,58,59,60,61),
+    array(0,1,2,3,4,5,6,7,13,14,15,19,20,22,24,26,28,29,30,32,33,34,35,36,37,39,40,41,43,45,47,49,50,54,55,56,62,63,64,65,66,67,68,69)
+  ));
 
 $difficulties = array($easy, $hard, $extreme);
 $puzzle = array();
 $game = 0;
-
-
-function indexesByValue($arr, $v) {
-    $concatenated = array_reduce($arr,
-        function ($prev, $curr) {
-            return array_merge($prev, $curr);
-        },
-        array());
-    $mapped = array_map(
-        function ($val, $idx) use ($v) {
-            return ($val === $v) ? $idx : null;
-        },
-        array_values($concatenated),
-        array_keys($concatenated));
-    $filtered = array_filter($mapped,
-        function ($val) {
-            return $val !== null;
-        });
-    return array_values($filtered);
-}
-
-$middle = array(
-    array(
-        indexesByValue($difficulties[0]['mid'], 0),
-        indexesByValue($difficulties[0]['mid'], 1)
-    ),
-    array(
-        indexesByValue($difficulties[1]['mid'], 0),
-        indexesByValue($difficulties[1]['mid'], 1)
-    ),
-    array(
-        indexesByValue($difficulties[2]['mid'], 0),
-        indexesByValue($difficulties[2]['mid'], 1)
-    )
-);
 
 
 function allTheSame() {
@@ -116,8 +62,8 @@ function generatePuzzle($game, $difficulty) {
     $M = $difficulties[$difficulty]['m'];
     $nTurns = $N * $M / 2;
     clearPuzzle();
-    $zeros = $middle[$difficulty][0];
-    $ones = $middle[$difficulty][1];
+    $zeros = $difficulties[$difficulty]['middle'][0];
+    $ones = $difficulties[$difficulty]['middle'][1];
     // discard half of the ones
     $nOnes = count($ones) / 2;
     while (count($ones) > $nOnes)

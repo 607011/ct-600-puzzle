@@ -12,8 +12,7 @@ if (isset($_REQUEST['difficulty'])) {
         'difficulty' => $difficulty,
         'puzzle' => $puzzle,
         'N' => $N,
-        'M' => $M,
-        'solution' => $selected
+        'M' => $M
     );
 }
 else {
