@@ -16,8 +16,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* extern */ var Solver;
-
 Number.prototype.factorial = function () {
   var x = 1, i;
   for (i = 2; i <= this; ++i)
@@ -25,85 +23,12 @@ Number.prototype.factorial = function () {
   return x;
 };
 
-Number.prototype.clamp = function (lo, hi) {
-  return Math.min(Math.max(this, lo), hi);
-};
-
-Array.prototype.clone = function () {
-  return this.slice(0);
-};
-
 
 (function () {
   "use strict";
-  var RNG = function (seed) {
-    this.seed(seed || Date.now());
-  };
-  RNG.MAX_VALUE = 4294967296;
-  RNG.prototype.seed = function (seed) {
-    if (typeof seed !== 'number')
-      throw new TypeError('Parameter `seed` must be a number');
-    this.X = seed;
-  };
-  RNG.prototype.next = function () {
-    // LCG from the book 'Numerical Recipes'
-    this.X = (1664525 * this.X + 1013904223) % RNG.MAX_VALUE;
-    return this.X;
-  };
-
   var opts = { game: null, difficulty: null, n: 2 },
-    MAX_STATES = 6, RANDOMIZER = 'dumb',
-    // TODO: Berechnen von `difficulties` anhand von `opts.n`
-    difficulties = [
-      { d: 'leicht', n: 3, m: 4, mid: [
-        [1, 1, 1],
-        [1, 0, 1],
-        [1, 0, 1],
-        [1, 1, 1]
-      ] },
-      {
-        d: 'schwer', n: 4, m: 5, mid: [
-        [0, 0, 0, 0],
-        [1, 1, 1, 1],
-        [1, 0, 0, 1],
-        [1, 1, 1, 1],
-        [0, 0, 0, 0]
-      ] },
-      {
-        d: 'extrem', n: 7, m: 10, mid: [
-        [1, 1, 1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 0, 0, 1],
-        [1, 1, 0, 0, 0, 1, 1],
-        [0, 1, 0, 1, 0, 1, 0],
-        [1, 1, 1, 0, 1, 1, 1],
-        [1, 1, 1, 0, 1, 1, 1],
-        [0, 1, 0, 1, 0, 1, 0],
-        [1, 1, 0, 0, 0, 1, 1],
-        [1, 0, 0, 0, 0, 0, 1],
-        [1, 1, 1, 1, 1, 1, 1]
-      ] }
+    difficulties = [      { d: 'leicht', n: 3, m: 4 },      { d: 'schwer', n: 4, m: 5 },      { d: 'extrem', n: 7, m: 10 }
     ],
-    indexesByValue = function (arr, v) {
-      return arr.reduce(function (prev, curr) { return prev.concat(curr); })
-        .map(function (curr, idx, arr) { return (curr === v) ? idx : null; })
-        .filter(function (val) { return val !== null; });
-    },
-    // TODO: Berechnen von `middle` anhand von `opts.n`
-    middle = [
-      {
-        0: indexesByValue(difficulties[0].mid, 0),
-        1: indexesByValue(difficulties[0].mid, 1)
-      },
-      {
-        0: indexesByValue(difficulties[1].mid, 0),
-        1: indexesByValue(difficulties[1].mid, 1)
-      },
-      {
-        0: indexesByValue(difficulties[2].mid, 0),
-        1: indexesByValue(difficulties[2].mid, 1)
-      }
-    ],
-    rng = new RNG(),
     puzzle, moves,
     N, M, nFields, nTurns, nCombinations,
     cellW, cellH;
@@ -153,7 +78,7 @@ Array.prototype.clone = function () {
 
   function resize() {
     var i, x, y, tw, th, persp, cells = $('#puzzle .cell'), left, top;
-    if ($(window).width() >= 480) {
+    if ($('#main').width() >= 480) {
       cellW = Math.floor(411 / N);
       cellH = Math.floor(582 / M);
       persp = 2;
@@ -190,15 +115,12 @@ Array.prototype.clone = function () {
     moves.push({ x: x, y: y });
     $('#moves').text(moves.length);
     $('#again').prop('disabled', false);
-    setTimeout(checkFinished, 250);
-    if ($('#solution').css('display') === 'block')
-      solvePuzzle();
+    checkFinished();
   }
 
 
   function drawPuzzle() {
     var x, y, i, p = $('#puzzle'), cell;
-    p.empty();
     for (y = 0; y < M; ++y) {
       for (x = 0; x < N; ++x) {
         cell = $('<span></span>')
@@ -219,72 +141,44 @@ Array.prototype.clone = function () {
   }
 
 
-  function clearPuzzle() {
-    var x, y;
-    puzzle = new Array(N);
-    for (x = 0; x < N; ++x) {
-      puzzle[x] = new Array(M);
-      for (y = 0; y < M; ++y)
-        puzzle[x][y] = 0;
-    }
+  function loadPuzzle(game) {
+    $.ajax({
+      url: 'ajax/puzzle.php',
+      type: 'GET',
+      accepts: 'json',
+      data: {
+        game: game,
+        difficulty: opts.difficulty
+      }
+    }).done(function (data) {
+      opts.game = data.game;
+      puzzle = data.puzzle;
+      $('#game-number').text(opts.game);
+      drawPuzzle();
+    }).error(function (e) {
+      console.log(e);
+    });
   }
 
 
-  function initPuzzle() {
-    var i, f, selected, ones, zeros, nOnes, nZeros;
-    clearPuzzle();
-    rng.seed(opts.game);
-    $('#game-number').text(opts.game);
-    if (opts.n === 2) {
-      ones = middle[opts.difficulty][0].clone();
-      zeros = middle[opts.difficulty][1].clone();
-      // discard half of the ones
-      nOnes = ones.length / 2;
-      while (ones.length > nOnes)
-        ones.splice(rng.next() % ones.length, 1);
-      // discard zeros
-      nZeros = nTurns - nOnes;
-      while (zeros.length > nZeros)
-        zeros.splice(rng.next() % zeros.length, 1);
-      selected = ones.concat(zeros);
-      for (i = 0; i < selected.length; ++i) {
-        f = selected[i];
-        turn(f % N, Math.floor(f / N));
-      }
-    }
-    else {
-      i = nTurns;
-      while (i-- > 0) {
-        f = rng.next() % nFields;
-        turn(f % N, Math.floor(f / N));
-      }
-    }
-    drawPuzzle();
-  }
-
-
-  function newGame(difficulty, num) {
-    var i = opts.n;
-    $('#solution').empty().css('display', 'none');
-    opts.difficulty = (typeof difficulty === 'number') ? difficulty : opts.difficulty;
+  function newGame(game) {
+    opts.game = (typeof game === 'number') ? game : Math.floor(Math.random() * nCombinations);
+    opts.difficulty = parseInt($('#d-container').val(), 10);
     N = difficulties[opts.difficulty].n;
     M = difficulties[opts.difficulty].m;
     nFields = N * M;
     nTurns = nFields / 2;
-    nCombinations = nFields.factorial() / (nTurns.factorial() * (nFields - nTurns).factorial());
-    opts.game = (typeof num === 'number') ? num : Math.floor(Math.random() * nCombinations % RNG.MAX_VALUE);
-    document.location.hash = $.map(opts, function (value, key) { return key + '=' + value; }).join(';');
-    moves = [];
+    nCombinations = nFields.factorial() / (nTurns.factorial() * (nFields - nTurns).factorial());    moves = [];
     $('#moves').text(0);
     $('#again').prop('disabled', true);
-    $('#hint').prop('disabled', false);
-    initPuzzle();
+    $('#puzzle').empty().append($('<span class="loader"></span>'));
+    loadPuzzle();
   }
 
 
   function restart() {
     if (confirm('Dieses Puzzle wirklich von vorne beginnen?'))
-      newGame(opts.difficulty, opts.game);
+      newGame(opts.game);
   }
 
 
@@ -316,99 +210,12 @@ Array.prototype.clone = function () {
   }
 
 
-  function solvePuzzle() {
-    var solutions = Solver.solve(puzzle, opts.n),
-      solution, nSteps, table = $('#solution'),
-      x, y, tr, td, i = solutions.length;
-    table.empty().css('display', 'block');
-    function concatenate(p, c) { return p.concat(c); }
-    function summarize(p, c) { return p + c; }
-    while (i--) {
-      solution = solutions[i];
-      nSteps = solution.reduce(concatenate).reduce(summarize, 0);
-      tr = $('<tr></tr>')
-        .append($('<td title="Schritte zur Lösung"></td>')
-        .attr('colspan', N)
-        .addClass('steps')
-        .text(nSteps));
-      table.append(tr);
-      for (y = 0; y < M; ++y) {
-        tr = $('<tr></tr>');
-        for (x = 0; x < N; ++x)
-          tr.append($('<td></td>')
-            .text(solution[x][y]).attr('title', x + ',' + y));
-        table.append(tr);
-      }
-    }
-  }
-
-
-  function playSolution() {
-    var i = 0,
-      solutions = Solver.solve(puzzle, opts.n),
-      solution = solutions[0],
-      stopped = false,
-      flips = (function() {
-        var x, y, n, moves = [];
-        for (y = 0; y < M; ++y)
-          for (x = 0; x < N; ++x) {
-            n = solution[x][y];
-            while (n-- > 0)
-              moves.push({ x: x, y: y });
-          }
-        return moves;
-      })(),
-      restoreButtons = function () {
-        $('#solve').text('Lösen').off('click', stop).on('click', playSolution);
-        $('#hint').prop('disabled', false);
-        $('#new-game').prop('disabled', false);
-        $('#d-container').prop('disabled', false);
-      },
-      stop = function () {
-        stopped = true;
-        restoreButtons();
-      },
-      makeTurn = function () {
-        if (stopped)
-          return;
-        if (i < flips.length) {
-          turn(flips[i].x, flips[i].y);
-          ++i;
-          if ($('#solution').css('display') === 'block')
-            solvePuzzle();
-          setTimeout(makeTurn, 1000);
-        }
-        else {
-          restoreButtons();
-          alert('Gar nicht so schwer, oder? ;-)');
-          newGame();
-        }
-      };
-    setTimeout(makeTurn, 250);
-    $('#solve').text('Stopp').off('click', playSolution).on('click', stop);
-    $('#hint').prop('disabled', true);
-    $('#again').prop('disabled', true);
-    $('#new-game').prop('disabled', true);
-    $('#d-container').prop('disabled', true);
-  }
-
   function init() {
-    var p;
-    if (document.location.hash.length > 1) {
-      p = document.location.hash.substring(1).split(';');
-      $.each(p, function (i, d) {
-        var p = d.split('=');
-        opts[p[0]] = parseInt(p[1], 10);
-      });
-    }
-    opts.n = opts.n.clamp(2, MAX_STATES);
     $.each(difficulties, function (i, d) {
       $('#d-container').append($('<option></option>').attr('value', i).text(d.d));
     });
     preloadImages()
       .then(function () {
-        $('#solve').on('click', playSolution);
-        $('#hint').on('click', solvePuzzle);
         $('#again').on('click', restart).prop('disabled', true);
         $('#d-container').on('change', function () {
           newGame(parseInt($('#d-container').val(), 10));
@@ -416,12 +223,8 @@ Array.prototype.clone = function () {
         $('#new-game').on('click', function () {
           newGame(parseInt($('#d-container').val(), 10));
         });
-        newGame(
-          typeof opts.difficulty === 'number' ? opts.difficulty.clamp(0, difficulties.length - 1) : 1,
-          typeof opts.game === 'number' ? opts.game.clamp(0, RNG.MAX_VALUE) : undefined
-        );
+        newGame(typeof opts.difficulty === 'number' ? opts.difficulty.clamp(0, difficulties.length - 1) : 1);
         $('#d-container').val(opts.difficulty);
-        $('#puzzle').after($('<table></table>').attr('id', 'solution'));
         $(window).on('resize', resize);
         resize();
         (function generateStyles () {
