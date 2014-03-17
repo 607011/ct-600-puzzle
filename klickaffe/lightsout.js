@@ -189,8 +189,7 @@ MersenneTwister.prototype.genrand_int32 = function () {
     rng = new RNG(),
     mt = new MersenneTwister(Date.now()),
     puzzle, moves,
-    N, M, nFields, nTurns, nCombinations,
-    cellW, cellH;
+    N, M, nFields, nTurns, nCombinations;
 
 
   function flip(x, y) {
@@ -269,18 +268,17 @@ MersenneTwister.prototype.genrand_int32 = function () {
     nTurns = nFields / 2;
     nCombinations = nFields.factorial() / (nTurns.factorial() * (nFields - nTurns).factorial());
     opts.game = (typeof num === 'number') ? num : Math.floor(Math.random() * nCombinations % RNG.MAX_VALUE);
-    moves = [];
     initPuzzle();
   }
 
 
   function idiotSolver() {
     var i = 0;
-    while (!allTheSame()) {
+    do {
       turn(mt.genrand_int32() % N, mt.genrand_int32() % M);
       if (++i % 1000000 === 0)
-        console.log('#' + i);
-    }
+        console.log('#' + i + ' ' + (new Date()).toISOString());
+    } while (!allTheSame());
     return i;
   }
 
@@ -288,7 +286,7 @@ MersenneTwister.prototype.genrand_int32 = function () {
   function main() {
     var i, n, N = 1000, sum = 0;
     for (i = 0; i < N; ++i) {
-      newGame(1, mt.genrand_int32());
+      newGame(2, mt.genrand_int32());
       n = idiotSolver();
       sum += n;
       console.log('solved after ' + n + ' random turns.');
