@@ -52,8 +52,7 @@ Array.prototype.clone = function () {
   };
 
   var opts = { game: null, difficulty: null, n: 2 },
-    MAX_STATES = 6, RANDOMIZER = 'dumb',
-    // TODO: Berechnen von `difficulties` anhand von `opts.n`
+    MAX_STATES = 6,
     difficulties = [
       { d: 'leicht', n: 3, m: 4, mid: [
         [1, 1, 1],

@@ -1,5 +1,5 @@
 /*
-    c't Cover Switch
+    c't Cover Switch Klickaffe
     Copyright (c) 2014 Oliver Lau <ola@ct.de>, Heise Zeitschriften Verlag
 
     This program is free software: you can redistribute it and/or modify
@@ -134,9 +134,8 @@ MersenneTwister.prototype.genrand_int32 = function () {
     return this.X;
   };
 
-  var opts = { game: null, difficulty: null, n: 2 },
-    MAX_STATES = 6, RANDOMIZER = 'dumb',
-    // TODO: Berechnen von `difficulties` anhand von `opts.n`
+  var MAX_STATES = 6,
+    opts = { game: null, difficulty: null, n: 2 },
     difficulties = [
       { d: 'leicht', n: 3, m: 4, mid: [
         [1, 1, 1],
@@ -189,7 +188,8 @@ MersenneTwister.prototype.genrand_int32 = function () {
     rng = new RNG(),
     mt = new MersenneTwister(Date.now()),
     puzzle, moves,
-    N, M, nFields, nTurns, nCombinations;
+    N, M, nFields, nTurns, nCombinations,
+    nSolutions = 0;
 
 
   function flip(x, y) {
@@ -273,25 +273,28 @@ MersenneTwister.prototype.genrand_int32 = function () {
 
 
   function idiotSolver() {
-    var i = 0;
+    var i = 0, f;
     do {
-      turn(mt.genrand_int32() % N, mt.genrand_int32() % M);
+      f = mt.genrand_int32() % nFields;
+      turn(f % N, Math.floor(f / N));
+      // turn(mt.genrand_int32() % N, mt.genrand_int32() % M);
       if (++i % 1000000 === 0)
-        console.log('#' + i + ' ' + (new Date()).toISOString());
+        console.log((new Date()).toISOString() + ' ' + '#' + i + ' ' + nSolutions + ' solutions found.');
     } while (!allTheSame());
     return i;
   }
 
 
   function main() {
-    var i, n, N = 1000, sum = 0;
-    for (i = 0; i < N; ++i) {
-      newGame(2, mt.genrand_int32());
+    var i, n, sum = 0, N_ITERATIONS = 10000;
+    for (i = 0; i < N_ITERATIONS; ++i) {
+      newGame(0, mt.genrand_int32());
       n = idiotSolver();
       sum += n;
+      ++nSolutions;
       console.log('solved after ' + n + ' random turns.');
     }
-    console.log('\naverage turns per solution: ' + (sum / N));
+    console.log('\naverage turns per solution: ' + (sum / N_ITERATIONS).toFixed(1));
   }
 
   main();
