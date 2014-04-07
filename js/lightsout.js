@@ -18,22 +18,6 @@
 
 /* extern */ var Solver;
 
-Number.prototype.factorial = function () {
-  var x = 1, i;
-  for (i = 2; i <= this; ++i)
-    x *= i;
-  return x;
-};
-
-Number.prototype.clamp = function (lo, hi) {
-  return Math.min(Math.max(this, lo), hi);
-};
-
-Array.prototype.clone = function () {
-  return this.slice(0);
-};
-
-
 (function () {
   "use strict";
   var RNG = function (seed) {
@@ -51,15 +35,33 @@ Array.prototype.clone = function () {
     return this.X;
   };
 
+  Number.prototype.factorial = function () {
+    var x = 1, i;
+    for (i = 2; i <= this; ++i)
+      x *= i;
+    return x;
+  };
+
+  Number.prototype.clamp = function (lo, hi) {
+    return Math.min(Math.max(this, lo), hi);
+  };
+
+  Array.prototype.clone = function () {
+    return this.slice(0);
+  };
+
   var opts = { game: null, difficulty: null, n: 2 },
+    PREFIXES = ['', '-moz-', '-ms-', '-o-', '-webkit-'],
     MAX_STATES = 6,
     difficulties = [
-      { d: 'leicht', n: 3, m: 4, mid: [
+      {
+        d: 'leicht', n: 3, m: 4, mid: [
         [1, 1, 1],
         [1, 0, 1],
         [1, 0, 1],
         [1, 1, 1]
-      ] },
+        ]
+      },
       {
         d: 'schwer', n: 4, m: 5, mid: [
         [0, 0, 0, 0],
@@ -67,7 +69,8 @@ Array.prototype.clone = function () {
         [1, 0, 0, 1],
         [1, 1, 1, 1],
         [0, 0, 0, 0]
-      ] },
+        ]
+      },
       {
         d: 'extrem', n: 7, m: 10, mid: [
         [1, 1, 1, 1, 1, 1, 1],
@@ -80,7 +83,8 @@ Array.prototype.clone = function () {
         [1, 1, 0, 0, 0, 1, 1],
         [1, 0, 0, 0, 0, 0, 1],
         [1, 1, 1, 1, 1, 1, 1]
-      ] }
+        ]
+      }
     ],
     indexesByValue = function (arr, v) {
       return arr.reduce(function (prev, curr) { return prev.concat(curr); })
@@ -123,9 +127,9 @@ Array.prototype.clone = function () {
 
   function turn(x, y) {
     flip(x, y);
-    if (y > 0)     flip(x, y - 1);
+    if (y > 0) flip(x, y - 1);
     if (y + 1 < M) flip(x, y + 1);
-    if (x > 0)     flip(x - 1, y);
+    if (x > 0) flip(x - 1, y);
     if (x + 1 < N) flip(x + 1, y);
   }
 
@@ -178,7 +182,7 @@ Array.prototype.clone = function () {
             .css('background-position', (-left) + 'px ' + (-top) + 'px');
       }
     }
-    $.each(['-moz-', '-ms-', '-webkit-', ''], function (i, prefix) {
+    PREFIXES.forEach(function (prefix) {
       cells.css(prefix + 'perspective', Math.round(persp * cellW) + 'px');
     });
   }
@@ -347,7 +351,7 @@ Array.prototype.clone = function () {
       solutions = Solver.solve(puzzle, opts.n),
       solution = solutions[0],
       stopped = false,
-      flips = (function() {
+      flips = (function () {
         var x, y, n, moves = [];
         for (y = 0; y < M; ++y)
           for (x = 0; x < N; ++x) {
@@ -401,8 +405,8 @@ Array.prototype.clone = function () {
       });
     }
     opts.n = opts.n.clamp(2, MAX_STATES);
-    $.each(difficulties, function (i, d) {
-      $('#d-container').append($('<option></option>').attr('value', i).text(d.d));
+    difficulties.forEach(function (val, idx) {
+      $('#d-container').append($('<option></option>').attr('value', idx).text(val.d));
     });
     preloadImages()
       .then(function () {
@@ -423,12 +427,12 @@ Array.prototype.clone = function () {
         $('#puzzle').after($('<table></table>').attr('id', 'solution'));
         $(window).on('resize', resize);
         resize();
-        (function generateStyles () {
+        (function generateStyles() {
           var i, ii, styles = '',
             n = opts.n, a = cellW, deg1, deg2,
             r = (n > 2) ? a / (2 * Math.tan(Math.PI / n)) : 0,
-            t1 = (n > 2) ? ('translateZ(' + (-r) + 'px)') : '',
-            t2 = (n > 2) ? ('translateZ(' + r + 'px)') : '';
+            t1 = (n > 2) ? ('translateZ(' + (-r) + 'px) ') : '',
+            t2 = (n > 2) ? (' translateZ(' + r + 'px)') : '';
           for (i = 0; i < n; ++i) {
             ii = (i + 1) % n;
             deg1 = i * 360 / n;
@@ -437,48 +441,16 @@ Array.prototype.clone = function () {
               '.state' + i + ' { background-image: url("img/cover' + i + '-582.jpg"); }\n' +
               '@media screen and (max-width: 480px) { .state' + i + ' { background-image: url("img/cover' + i + '-388.jpg"); } }\n' +
               '.pos' + i + ' {\n' +
-              '  -moz-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n' +
-              '  -o-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n' +
-              '  -webkit-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n' +
-              '  animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n' +
+              PREFIXES.map(function (prefix) {
+                return prefix + 'animation: spin-to-pos' + ii + ' ease 0.5s forwards;'
+              }).join('\n') +
               '}\n' +
-              '@-moz-keyframes spin-to-pos' + i + ' {\n' +
-              '  from {\n' +
-              '    -moz-transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n' +
-              '    transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n' +
-              '  }\n' +
-              '  to {\n' +
-              '    -moz-transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n' +
-              '    transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n' +
-              '  }\n' +
-              '}\n' +
-              '@-webkit-keyframes spin-to-pos' + i + ' {\n' +
-              '  from {\n' +
-              '    -webkit-transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 +
-              ';\n' +
-              '    transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n' +
-              '  }\n' +
-              '  to {\n' +
-              '    -webkit-transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n' +
-              '    transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n' +
-              '  }\n' +
-              '}\n' +
-              '@keyframes spin-to-pos' + i + ' {\n' +
-              '  from {\n' +
-              '    -moz-transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n' +
-              '    -ms-transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n' +
-              '    -o-transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n' +
-              '    -webkit-transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n' +
-              '    transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n' +
-              '  }\n' +
-              '  to {\n' +
-              '    -moz-transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n' +
-              '    -ms-transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n' +
-              '    -o-transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n' +
-              '    -webkit-transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n' +
-              '    transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n' +
-              '  }\n' +
-              '}\n';
+              PREFIXES.map(function (prefix) {
+                return '@' + prefix + 'keyframes spin-to-pos' + i + ' {\n' +
+                  '  from { ' + prefix + 'transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + '; }\n' +
+                  '  to { ' + prefix + 'transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + '; }\n' +
+                  '}';
+              }).join('\n');
           }
           $('head').append($('<style type="text/css"></style>').text(styles));
         })();
