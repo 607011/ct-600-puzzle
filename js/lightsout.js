@@ -433,51 +433,52 @@ Array.prototype.clone = function () {
             ii = (i + 1) % n;
             deg1 = i * 360 / n;
             deg2 = (i + 1) * 360 / n;
-            styles += '\n'
-              + '.state' + i + ' { background-image: url("img/cover' + i + '-582.jpg"); }\n'
-              + '@media screen and (max-width: 480px) { .state' + i + ' { background-image: url("img/cover' + i + '-388.jpg"); } }\n'
-              + '.pos' + i + ' {\n'
-              + '  -moz-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
-              + '  -o-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
-              + '  -webkit-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
-              + '  animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n'
-              + '}\n'
-              + '@-moz-keyframes spin-to-pos' + i + ' {\n'
-              + '  from {\n'
-              + '    -moz-transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n'
-              + '    transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n'
-              + '  }\n'
-              + '  to {\n'
-              + '    -moz-transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n'
-              + '    transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n'
-              + '  }\n'
-              + '}\n'
-              + '@-webkit-keyframes spin-to-pos' + i + ' {\n'
-              + '  from {\n'
-              + '    -webkit-transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n'
-              + '    transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n'
-              + '  }\n'
-              + '  to {\n'
-              + '    -webkit-transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n'
-              + '    transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n'
-              + '  }\n'
-              + '}\n'
-              + '@keyframes spin-to-pos' + i + ' {\n'
-              + '  from {\n'
-              + '    -moz-transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n'
-              + '    -ms-transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n'
-              + '    -o-transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n'
-              + '    -webkit-transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n'
-              + '    transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n'
-              + '  }\n'
-              + '  to {\n'
-              + '    -moz-transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n'
-              + '    -ms-transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n'
-              + '    -o-transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n'
-              + '    -webkit-transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n'
-              + '    transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n'
-              + '  }\n'
-              + '}\n';
+            styles += '\n' +
+              '.state' + i + ' { background-image: url("img/cover' + i + '-582.jpg"); }\n' +
+              '@media screen and (max-width: 480px) { .state' + i + ' { background-image: url("img/cover' + i + '-388.jpg"); } }\n' +
+              '.pos' + i + ' {\n' +
+              '  -moz-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n' +
+              '  -o-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n' +
+              '  -webkit-animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n' +
+              '  animation: spin-to-pos' + ii + ' ease 0.5s forwards;\n' +
+              '}\n' +
+              '@-moz-keyframes spin-to-pos' + i + ' {\n' +
+              '  from {\n' +
+              '    -moz-transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n' +
+              '    transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n' +
+              '  }\n' +
+              '  to {\n' +
+              '    -moz-transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n' +
+              '    transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n' +
+              '  }\n' +
+              '}\n' +
+              '@-webkit-keyframes spin-to-pos' + i + ' {\n' +
+              '  from {\n' +
+              '    -webkit-transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 +
+              ';\n' +
+              '    transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n' +
+              '  }\n' +
+              '  to {\n' +
+              '    -webkit-transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n' +
+              '    transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n' +
+              '  }\n' +
+              '}\n' +
+              '@keyframes spin-to-pos' + i + ' {\n' +
+              '  from {\n' +
+              '    -moz-transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n' +
+              '    -ms-transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n' +
+              '    -o-transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n' +
+              '    -webkit-transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n' +
+              '    transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + ';\n' +
+              '  }\n' +
+              '  to {\n' +
+              '    -moz-transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n' +
+              '    -ms-transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n' +
+              '    -o-transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n' +
+              '    -webkit-transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n' +
+              '    transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + ';\n' +
+              '  }\n' +
+              '}\n';
           }
           $('head').append($('<style type="text/css"></style>').text(styles));
         })();
