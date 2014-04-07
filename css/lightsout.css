@@ -74,7 +74,6 @@ html, body {
   }
 
 #puzzle {
-  border-collapse: collapse;
   margin: 10px auto;
   background-color: #2f3233;
   box-shadow: #2f3233 0px 0px 6px;
