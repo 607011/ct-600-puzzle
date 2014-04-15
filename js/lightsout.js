@@ -174,7 +174,8 @@
     th = cellH + 'px';
     for (i = 0; i < opts.n; ++i)
       $('.pos' + i).css('width', tw).css('height', th);
-    cells.css('width', tw).css('height', th).css('overflow', opts.n > 4 ? 'hidden' : 'visible');
+    cells.css('width', tw).css('height', th);
+    // cells.css('overflow', opts.n > 4 ? 'hidden' : 'visible');
     for (y = 0; y < M; ++y) {
       for (x = 0; x < N; ++x) {
         left = x * cellW;
@@ -428,25 +429,25 @@
         $(window).on('resize', resize);
         resize();
         (function generateStyles() {
-          var i, ii, styles = '',
+          var state, state2, styles = '',
             n = opts.n, a = cellW, deg1, deg2,
-            r = (n > 2) ? a / (2 * Math.tan(Math.PI / n)) : 0,
-            t1 = (n > 2) ? ('translateZ(' + (-r) + 'px) ') : '',
-            t2 = (n > 2) ? (' translateZ(' + r + 'px)') : '';
-          for (i = 0; i < n; ++i) {
-            ii = (i + 1) % n;
-            deg1 = i * 360 / n;
-            deg2 = (i + 1) * 360 / n;
+            d = (n > 2) ? a / (2 * Math.tan(Math.PI / n)) : 3,
+            t1 = 'translateZ(' + (-d) + 'px) ',
+            t2 = ' translateZ(' + d + 'px)';
+          for (state = 0; state < n; ++state) {
+            state2 = (state + 1) % n;
+            deg1 = state * 360 / n;
+            deg2 = (state + 1) * 360 / n;
             styles += '\n' +
-              '.state' + i + ' { background-image: url("img/cover' + i + '-582.jpg"); }\n' +
-              '@media screen and (max-width: 480px) { .state' + i + ' { background-image: url("img/cover' + i + '-388.jpg"); } }\n' +
-              '.pos' + i + ' {\n' +
+              '.state' + state + ' { background-image: url("img/cover' + state + '-582.jpg"); }\n' +
+              '@media screen and (max-width: 480px) { .state' + state + ' { background-image: url("img/cover' + state + '-388.jpg"); } }\n' +
+              '.pos' + state + ' {\n' +
               PREFIXES.map(function (prefix) {
-                return prefix + 'animation: spin-to-pos' + ii + ' ease 0.5s forwards;'
+                return prefix + 'animation: spin-to-pos' + state2 + ' ease 0.5s forwards;'
               }).join('\n') +
               '}\n' +
               PREFIXES.map(function (prefix) {
-                return '@' + prefix + 'keyframes spin-to-pos' + i + ' {\n' +
+                return '@' + prefix + 'keyframes spin-to-pos' + state + ' {\n' +
                   '  from { ' + prefix + 'transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + '; }\n' +
                   '  to { ' + prefix + 'transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + '; }\n' +
                   '}';

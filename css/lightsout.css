@@ -10,13 +10,32 @@ html, body {
   height: 100%;
   font-family: -apple-system-font, Helvetica, Arial, Verdana, sans-serif;
   font-size: 15px;
-  background: #383f42;
+  /*background: #383f42;*/
+  background-color: white;
   color: #f0f0f0;
 }
 
 #main {
   position: relative;
 }
+
+  #main.persp {
+    -webkit-transform-style: preserve-3d;
+    transform-style: preserve-3d;
+    -webkit-perspective: 600px;
+    -moz-perspective: 600px;
+    -ms-perspective: 600px;
+    perspective: 600px;
+    -webkit-perspective-origin: 50% -50%;
+    -moz-perspective-origin: 50% -50%;
+    -ms-perspective-origin: 50% -50%;
+    perspective-origin: 50% -50%;
+    -webkit-transform: translate3d(0, 300px, 0) scale(1.8);
+    -moz-transform: translate3d(0, 300px, 0) scale(1.8);
+    -ms-transform: translate3d(0, 300px, 0) scale(1.8);
+    -o-transform: translate3d(0, 300px, 0) scale(1.8);
+    transform: translate3d(0, 300px, 0) scale(1.8);
+  }
 
 #info {
   margin: 1ex auto 1ex auto;
@@ -74,9 +93,18 @@ html, body {
   }
 
 #puzzle {
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+
+  -webkit-transform: rotateX(-20deg) rotateY(10deg);
+  -moz-transform: rotateX(-20deg) rotateY(10deg);
+  -ms-transform: rotateX(-20deg) rotateY(10deg);
+  -o-transform: rotateX(-20deg) rotateY(10deg);
+  transform: rotateX(-20deg) rotateY(10deg);
+
   margin: 10px auto;
-  background-color: #2f3233;
-  box-shadow: #2f3233 0px 0px 6px;
+  /*background-color: #2f3233;*/
+  /*box-shadow: #2f3233 0px 0px 6px;*/
   position: relative;
   width: 411px;
   height: 582px;
@@ -103,11 +131,12 @@ html, body {
   top: 0;
   left: 0;
   display: inline-block;
-  -moz-backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
+  -moz-backface-visibility: visible;
+  -webkit-backface-visibility: visible;
+  backface-visibility: visible;
   background-repeat: no-repeat;
   cursor: pointer;
+  border: 1px solid black;
 }
 
 button {
