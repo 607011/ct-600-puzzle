@@ -21,18 +21,20 @@
 (function () {
   "use strict";
   var RNG = function (seed) {
-    this.seed(seed || Date.now());
+    if (typeof seed !== 'number')
+      seed = Date.now();
+    this.seed(seed);
   };
   RNG.MAX_VALUE = 4294967296;
   RNG.prototype.seed = function (seed) {
     if (typeof seed !== 'number')
       throw new TypeError('Parameter `seed` must be a number');
-    this.X = seed;
+    this._X = seed;
   };
   RNG.prototype.next = function () {
     // LCG from the book 'Numerical Recipes'
-    this.X = (1664525 * this.X + 1013904223) % RNG.MAX_VALUE;
-    return this.X;
+    this._X = (1664525 * this._X + 1013904223) % RNG.MAX_VALUE;
+    return this._X;
   };
 
   Number.prototype.factorial = function () {
@@ -50,10 +52,10 @@
     return this.slice(0);
   };
 
-  var opts = { game: null, difficulty: null, n: 2 },
+  var opts = { game: undefined, difficulty: undefined, n: 2 },
     PREFIXES = ['', '-moz-', '-ms-', '-o-', '-webkit-'],
     MAX_STATES = 6,
-    difficulties = [
+    DIFFICULTIES = [
       {
         d: 'leicht', n: 3, m: 4, mid: [
         [1, 1, 1],
@@ -91,36 +93,37 @@
         .map(function (curr, idx, arr) { return (curr === v) ? idx : null; })
         .filter(function (val) { return val !== null; });
     },
-    // TODO: Berechnen von `middle` anhand von `opts.n`
-    middle = [
+    MIDDLE = [
       {
-        0: indexesByValue(difficulties[0].mid, 0),
-        1: indexesByValue(difficulties[0].mid, 1)
+        0: indexesByValue(DIFFICULTIES[0].mid, 0),
+        1: indexesByValue(DIFFICULTIES[0].mid, 1)
       },
       {
-        0: indexesByValue(difficulties[1].mid, 0),
-        1: indexesByValue(difficulties[1].mid, 1)
+        0: indexesByValue(DIFFICULTIES[1].mid, 0),
+        1: indexesByValue(DIFFICULTIES[1].mid, 1)
       },
       {
-        0: indexesByValue(difficulties[2].mid, 0),
-        1: indexesByValue(difficulties[2].mid, 1)
+        0: indexesByValue(DIFFICULTIES[2].mid, 0),
+        1: indexesByValue(DIFFICULTIES[2].mid, 1)
       }
     ],
     rng = new RNG(),
     puzzle, moves,
-    N, M, nFields, nTurns, nCombinations,
+    N, M, nFields, nTurns,
     cellW, cellH;
 
 
   function flip(x, y) {
-    var i, j, cell, m;
+    var state, cell, m;
     puzzle[x][y] = (puzzle[x][y] + 1) % opts.n;
-    for (i = 0; i < opts.n; ++i) {
-      cell = $('#pos' + i + '-' + x + '-' + y);
-      if (cell.length === 0)
-        continue;
-      m = cell.attr('class').match(/pos(\d+)/);
-      cell.removeClass(m[0]).addClass('pos' + ((parseInt(m[1], 10) + 1) % opts.n));
+    for (state = 0; state < opts.n; ++state) {
+      cell = $('#pos' + state + '-' + x + '-' + y);
+      if (cell.length > 0) {
+        m = cell.attr('class').match(/pos(\d+)/);
+        cell
+          .removeClass(m[0])
+          .addClass('pos' + ((parseInt(m[1], 10) + 1) % opts.n));
+      }
     }
   }
 
@@ -200,7 +203,7 @@
 
 
   function drawPuzzle() {
-    var x, y, i, p = $('#puzzle'), cell;
+    var x, y, state, p = $('#puzzle'), cell;
     p.empty();
     for (y = 0; y < M; ++y) {
       for (x = 0; x < N; ++x) {
@@ -208,12 +211,12 @@
           .attr('id', 'cell-' + x + '-' + y)
           .addClass('cell')
           .on('click', clickTile.bind(null, x, y));
-        for (i = 0; i < opts.n; ++i) {
+        for (state = 0; state < opts.n; ++state) {
           cell.append($('<span></span>')
             .addClass('three-d')
-            .attr('id', 'pos' + i + '-' + x + '-' + y)
-            .addClass('pos' + i)
-            .addClass('state' + (opts.n - puzzle[x][y] + i) % opts.n));
+            .attr('id', 'pos' + state + '-' + x + '-' + y)
+            .addClass('pos' + state)
+            .addClass('state' + (opts.n - puzzle[x][y] + state) % opts.n));
         }
         p.append(cell);
       }
@@ -234,26 +237,25 @@
 
 
   function initPuzzle() {
-    var i, f, selected, ones, zeros, nOnes, nZeros;
+    var i, f, ones, zeros, nOnes, nZeros;
     clearPuzzle();
     rng.seed(opts.game);
     $('#game-number').text(opts.game);
     if (opts.n === 2) {
-      ones = middle[opts.difficulty][0].clone();
-      zeros = middle[opts.difficulty][1].clone();
-      // discard half of the ones
+      ones = MIDDLE[opts.difficulty][0].clone();
+      zeros = MIDDLE[opts.difficulty][1].clone();
+      // die Hälfte der 1-Felder wegwerfen
       nOnes = ones.length / 2;
       while (ones.length > nOnes)
         ones.splice(rng.next() % ones.length, 1);
-      // discard zeros
+      // so viel 0-Felder wegwerfen, dass die
+      // gewünschte Anzahl von Zügen übrig bleibt
       nZeros = nTurns - nOnes;
       while (zeros.length > nZeros)
         zeros.splice(rng.next() % zeros.length, 1);
-      selected = ones.concat(zeros);
-      for (i = 0; i < selected.length; ++i) {
-        f = selected[i];
-        turn(f % N, Math.floor(f / N));
-      }
+      ones.concat(zeros).forEach(function (val) {
+        turn(val % N, Math.floor(val / N));
+      });
     }
     else {
       i = nTurns;
@@ -267,18 +269,16 @@
 
 
   function newGame(difficulty, num) {
-    var i = opts.n;
     $('#solution').empty().css('display', 'none');
+    opts.game = (typeof num === 'number') ? num : Math.floor(Math.random() * RNG.MAX_VALUE);
     opts.difficulty = (typeof difficulty === 'number') ? difficulty : opts.difficulty;
-    N = difficulties[opts.difficulty].n;
-    M = difficulties[opts.difficulty].m;
+    N = DIFFICULTIES[opts.difficulty].n;
+    M = DIFFICULTIES[opts.difficulty].m;
     nFields = N * M;
     nTurns = nFields / 2;
-    nCombinations = nFields.factorial() / (nTurns.factorial() * (nFields - nTurns).factorial());
-    opts.game = (typeof num === 'number') ? num : Math.floor(Math.random() * nCombinations % RNG.MAX_VALUE);
     document.location.hash = $.map(opts, function (value, key) { return key + '=' + value; }).join(';');
     moves = [];
-    $('#moves').text(0);
+    $('#moves').text(moves.length);
     $('#again').prop('disabled', true);
     $('#hint').prop('disabled', false);
     initPuzzle();
@@ -365,7 +365,7 @@
         $('#solve').text('Lösen').off('click', stop).on('click', playSolution);
         $('#hint').prop('disabled', false);
         $('#new-game').prop('disabled', false);
-        $('#d-container').prop('disabled', false);
+        $('#difficulties').prop('disabled', false);
       },
       stop = function () {
         stopped = true;
@@ -392,7 +392,7 @@
     $('#hint').prop('disabled', true);
     $('#again').prop('disabled', true);
     $('#new-game').prop('disabled', true);
-    $('#d-container').prop('disabled', true);
+    $('#difficulties').prop('disabled', true);
   }
 
   function init() {
@@ -405,25 +405,25 @@
       });
     }
     opts.n = opts.n.clamp(2, MAX_STATES);
-    difficulties.forEach(function (val, idx) {
-      $('#d-container').append($('<option></option>').attr('value', idx).text(val.d));
+    DIFFICULTIES.forEach(function (val, idx) {
+      $('#difficulties').append($('<option></option>').attr('value', idx).text(val.d));
     });
     preloadImages()
       .then(function () {
         $('#solve').on('click', playSolution);
         $('#hint').on('click', solvePuzzle);
         $('#again').on('click', restart).prop('disabled', true);
-        $('#d-container').on('change', function () {
-          newGame(parseInt($('#d-container').val(), 10));
+        $('#difficulties').on('change', function () {
+          newGame(parseInt($('#difficulties').val(), 10));
         });
         $('#new-game').on('click', function () {
-          newGame(parseInt($('#d-container').val(), 10));
+          newGame(parseInt($('#difficulties').val(), 10));
         });
         newGame(
-          typeof opts.difficulty === 'number' ? opts.difficulty.clamp(0, difficulties.length - 1) : 1,
+          typeof opts.difficulty === 'number' ? opts.difficulty.clamp(0, DIFFICULTIES.length - 1) : 1,
           typeof opts.game === 'number' ? opts.game.clamp(0, RNG.MAX_VALUE) : undefined
         );
-        $('#d-container').val(opts.difficulty);
+        $('#difficulties').val(opts.difficulty);
         $('#puzzle').after($('<table></table>').attr('id', 'solution'));
         $(window).on('resize', resize);
         resize();
