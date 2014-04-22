@@ -37,13 +37,6 @@
     return this._X;
   };
 
-  Number.prototype.factorial = function () {
-    var x = 1, i;
-    for (i = 2; i <= this; ++i)
-      x *= i;
-    return x;
-  };
-
   Number.prototype.clamp = function (lo, hi) {
     return Math.min(Math.max(this, lo), hi);
   };
@@ -114,15 +107,15 @@
 
 
   function flip(x, y) {
-    var state, cell, m;
+    var pos, cell, match;
     puzzle[x][y] = (puzzle[x][y] + 1) % opts.n;
-    for (state = 0; state < opts.n; ++state) {
-      cell = $('#pos' + state + '-' + x + '-' + y);
+    for (pos = 0; pos < opts.n; ++pos) {
+      cell = $('#pos' + pos + '-' + x + '-' + y);
       if (cell.length > 0) {
-        m = cell.attr('class').match(/pos(\d+)/);
+        match = cell.attr('class').match(/pos(\d+)/);
         cell
-          .removeClass(m[0])
-          .addClass('pos' + ((parseInt(m[1], 10) + 1) % opts.n));
+          .removeClass(match[0])
+          .addClass('pos' + ((parseInt(match[1], 10) + 1) % opts.n));
       }
     }
   }
@@ -158,7 +151,9 @@
 
 
   function resize() {
-    var i, x, y, tw, th, persp, cells = $('#puzzle .cell'), left, top;
+    var state, x, y, 
+      cells = $('#puzzle .cell'),
+      persp, left, top;
     if ($(window).width() >= 480) {
       cellW = Math.floor(411 / N);
       cellH = Math.floor(582 / M);
@@ -169,20 +164,27 @@
       cellH = Math.floor(388 / M);
       persp = 3;
     }
-    $('#puzzle').width((cellW * N) + 'px').height((cellH * M) + 'px');
-    tw = cellW + 'px';
-    th = cellH + 'px';
-    for (i = 0; i < opts.n; ++i)
-      $('.pos' + i).css('width', tw).css('height', th);
-    cells.css('width', tw).css('height', th).css('overflow', opts.n > 4 ? 'hidden' : 'visible');
+    $('#puzzle')
+      .width((cellW * N) + 'px')
+      .height((cellH * M) + 'px');
+    cells
+      .css('width', cellW + 'px')
+      .css('height', cellH + 'px')
+      .css('overflow', opts.n > 4 ? 'hidden' : 'visible');
+    for (state = 0; state < opts.n; ++state)
+      $('.pos' + state)
+        .css('width', cellW + 'px')
+        .css('height', cellH + 'px');
     for (y = 0; y < M; ++y) {
       for (x = 0; x < N; ++x) {
         left = x * cellW;
         top = y * cellH;
-        $('#cell-' + x + '-' + y).css('left', left + 'px').css('top', top + 'px');
-        for (i = 0; i < opts.n; ++i)
-          $('#pos' + i + '-' + x + '-' + y)
-            .css('background-position', (-left) + 'px ' + (-top) + 'px');
+        $('#cell-' + x + '-' + y)
+          .css('left', left + 'px')
+          .css('top', top + 'px');
+        for (state = 0; state < opts.n; ++state)
+          $('#pos' + state + '-' + x + '-' + y)
+            .css('background-position', (-left) + 'px' + ' ' + (-top) + 'px');
       }
     }
     PREFIXES.forEach(function (prefix) {
@@ -210,7 +212,7 @@
         cell = $('<span></span>')
           .attr('id', 'cell-' + x + '-' + y)
           .addClass('cell')
-          .on('click', clickTile.bind(null, x, y));
+          .on('click', clickTile.bind({}, x, y));
         for (state = 0; state < opts.n; ++state) {
           cell.append($('<span></span>')
             .addClass('three-d')
@@ -396,11 +398,9 @@
   }
 
   function init() {
-    var p;
     if (document.location.hash.length > 1) {
-      p = document.location.hash.substring(1).split(';');
-      $.each(p, function (i, d) {
-        var p = d.split('=');
+      document.location.hash.substring(1).split(';').forEach(function (arg) {
+        var p = arg.split('=');
         opts[p[0]] = parseInt(p[1], 10);
       });
     }
@@ -428,13 +428,13 @@
         $(window).on('resize', resize);
         resize();
         (function generateStyles() {
-          var state, state2, styles = '',
+          var state, nextState, styles = '',
             n = opts.n, a = cellW, deg1, deg2,
-            d = (n > 2) ? a / (2 * Math.tan(Math.PI / n)) : 0,
-            t1 = 'translateZ(' + (-d) + 'px) ',
-            t2 = ' translateZ(' + d + 'px)';
+            r = (n > 2) ? a / (2 * Math.tan(Math.PI / n)) : 0,
+            t1 = 'translateZ(' + (-r) + 'px) ',
+            t2 = ' translateZ(' + r + 'px)';
           for (state = 0; state < n; ++state) {
-            state2 = (state + 1) % n;
+            nextState = (state + 1) % n;
             deg1 = state * 360 / n;
             deg2 = (state + 1) * 360 / n;
             styles += '\n' +
@@ -442,7 +442,7 @@
               '@media screen and (max-width: 480px) { .state' + state + ' { background-image: url("img/cover' + state + '-388.jpg"); } }\n' +
               '.pos' + state + ' {\n' +
               PREFIXES.map(function (prefix) {
-                return prefix + 'animation: spin-to-pos' + state2 + ' ease 0.5s forwards;'
+                return prefix + 'animation: spin-to-pos' + nextState + ' ease 0.5s forwards;'
               }).join('\n') +
               '}\n' +
               PREFIXES.map(function (prefix) {

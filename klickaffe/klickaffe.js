@@ -288,7 +288,7 @@ MersenneTwister.prototype.genrand_int32 = function () {
   function main() {
     var i, n, sum = 0, N_ITERATIONS = 10000;
     for (i = 0; i < N_ITERATIONS; ++i) {
-      newGame(0, mt.genrand_int32());
+      newGame(1, mt.genrand_int32());
       n = idiotSolver();
       sum += n;
       ++nSolutions;
