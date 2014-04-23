@@ -1,0 +1,73 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <title>3d demo</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <link href="img/favicon_ct.ico" rel="shortcut icon" />
+  <script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
+  <style type="text/css">
+    #main {
+      position: absolute;
+      top: 200px;
+      left: 200px;
+      -webkit-transform-style: preserve-3d;
+      transform-style: preserve-3d;
+      -webkit-perspective: 1200px;
+      -moz-perspective: 1200px;
+      -ms-perspective: 1200px;
+      perspective: 1200px;
+      -webkit-perspective-origin: 50% -50%;
+      -moz-perspective-origin: 50% -50%;
+      -ms-perspective-origin: 50% -50%;
+      perspective-origin: 50% -50%;
+      -webkit-transform: rotateX(-20deg) rotateY(10deg);
+      -moz-transform: rotateX(-20deg) rotateY(10deg);
+      -ms-transform: rotateX(-20deg) rotateY(10deg);
+      -o-transform: rotateX(-20deg) rotateY(10deg);
+      transform: rotateX(-20deg) rotateY(10deg);
+    }
+
+    .square {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 200px;
+      height: 200px;
+      -moz-backface-visibility: visible;
+      -webkit-backface-visibility: visible;
+      backface-visibility: visible;
+    }
+
+    .face0 {
+      background-color: rgba(255, 0, 0, 0.1);
+    }
+
+    .face1 {
+      background-color: rgba(0, 255, 0, 0.7);
+      -moz-transform: translateZ(-57.735026918962575px) rotateY(120deg);
+      -ms-transform: translateZ(-57.735026918962575px) rotateY(120deg);
+      -o-transform: translateZ(-57.735026918962575px) rotateY(120deg);
+      -webkit-transform: translateZ(-57.735026918962575px) rotateY(120deg);
+      transform: translateZ(-57.735026918962575px) rotateY(120deg);
+    }
+
+    .face2 {
+      background-color: rgba(0, 0, 255, 0.1);
+      -moz-transform: translateZ(-57.735026918962575px) rotateY(240deg) translateZ(57.735026918962575px);
+      -ms-transform: translateZ(-57.735026918962575px) rotateY(240deg) translateZ(57.735026918962575px);
+      -o-transform: translateZ(-57.735026918962575px) rotateY(240deg) translateZ(57.735026918962575px);
+      -webkit-transform: translateZ(-57.735026918962575px) rotateY(240deg) translateZ(57.735026918962575px);
+      transform: translateZ(-57.735026918962575px) rotateY(240deg) translateZ(57.735026918962575px);
+    }
+  </style>
+</head>
+<body>
+  <div id="main" class="persp">
+    <div class="square face0"></div>
+    <div class="square face1"></div>
+    <div class="square face2"></div>
+  </div>
+</body>
+</html>
