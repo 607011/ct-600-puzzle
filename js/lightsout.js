@@ -409,7 +409,7 @@
       $('#difficulties').append($('<option></option>').attr('value', idx).text(val.d));
     });
     preloadImages()
-      .then(function () {
+      .done(function () {
         $('#solve').on('click', playSolution);
         $('#hint').on('click', solvePuzzle);
         $('#again').on('click', restart).prop('disabled', true);
