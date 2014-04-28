@@ -427,33 +427,59 @@
         $('#puzzle').after($('<table></table>').attr('id', 'solution'));
         $(window).on('resize', resize);
         resize();
-        (function generateStyles() {
-          var state, nextState, styles = '',
-            n = opts.n, a = cellW, deg1, deg2,
-            r = (n > 2) ? a / (2 * Math.tan(Math.PI / n)) : 0,
-            t1 = 'translateZ(' + (-r) + 'px) ',
-            t2 = ' translateZ(' + r + 'px)';
-          for (state = 0; state < n; ++state) {
-            nextState = (state + 1) % n;
-            deg1 = state * 360 / n;
-            deg2 = (state + 1) * 360 / n;
-            styles += '\n' +
-              '.state' + state + ' { background-image: url("img/cover' + state + '-582.jpg"); }\n' +
-              '@media screen and (max-width: 480px) { .state' + state + ' { background-image: url("img/cover' + state + '-388.jpg"); } }\n' +
-              '.pos' + state + ' {\n' +
-              PREFIXES.map(function (prefix) {
-                return prefix + 'animation: spin-to-pos' + nextState + ' ease 0.5s forwards;'
-              }).join('\n') +
-              '}\n' +
-              PREFIXES.map(function (prefix) {
-                return '@' + prefix + 'keyframes spin-to-pos' + state + ' {\n' +
-                  '  from { ' + prefix + 'transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + '; }\n' +
-                  '  to { ' + prefix + 'transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + '; }\n' +
-                  '}';
-              }).join('\n');
-          }
-          $('head').append($('<style type="text/css"></style>').text(styles));
-        })();
+        if (Modernizr.cssanimations && Modernizr.csstransforms3d)
+          (function generateStyles3D() {
+            var state, nextState, styles = '',
+              n = opts.n, a = cellW, deg1, deg2,
+              r = (n > 2) ? a / (2 * Math.tan(Math.PI / n)) : 0,
+              t1 = (n > 2) ? 'translateZ(' + (-r) + 'px) ' : '',
+              t2 = (n > 2) ? ' translateZ(' + r + 'px)' : ' translateZ(0.1px)';
+            for (state = 0; state < n; ++state) {
+              nextState = (state + 1) % n;
+              deg1 = state * 360 / n;
+              deg2 = (state + 1) * 360 / n;
+              styles += '\n' +
+                '.state' + state + ' { background-image: url("img/cover' + state + '-582.jpg"); }\n' +
+                '@media screen and (max-width: 480px) { .state' + state + ' { background-image: url("img/cover' + state + '-388.jpg"); } }\n' +
+                '.pos' + state + ' {\n' +
+                PREFIXES.map(function (prefix) {
+                  return prefix + 'animation: spin-to-pos' + nextState + ' ease 0.5s forwards;'
+                }).join('\n') +
+                '}\n' +
+                PREFIXES.map(function (prefix) {
+                  return '@' + prefix + 'keyframes spin-to-pos' + state + ' {\n' +
+                    '  from { ' + prefix + 'transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + '; }\n' +
+                    '  to { ' + prefix + 'transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + '; }\n' +
+                    '}';
+                }).join('\n');
+            }
+            $('head').append($('<style type="text/css"></style>').text(styles));
+          })();
+        else if (Modernizr.cssanimations)
+          (function generateStyles2D() {
+            var state, nextState, styles = '',
+              n = opts.n;
+            for (state = 0; state < n; ++state) {
+              nextState = (state + 1) % n;
+              styles += '\n' +
+                '.state' + state + ' { background-image: url("img/cover' + state + '-582.jpg"); }\n' +
+                '@media screen and (max-width: 480px) { .state' + state + ' { background-image: url("img/cover' + state + '-388.jpg"); } }\n' +
+                '.pos' + state + ' {\n' +
+                PREFIXES.map(function (prefix) {
+                  return prefix + 'animation: spin-to-pos' + nextState + ' ease 0.5s forwards;'
+                }).join('\n') +
+                '}\n' +
+                PREFIXES.map(function (prefix) {
+                  return '@' + prefix + 'keyframes spin-to-pos' + state + ' {\n' +
+                    '  from { z-index: ' + (100 + state) + '; }\n' +
+                    '  to { z-index: ' + (100 + state + 1) + '; }\n' +
+                    '}';
+                }).join('\n');
+            }
+            $('head').append($('<style type="text/css"></style>').text(styles));
+          })();
+        else
+          alert('Dein Browser kann das Puzzle nicht darstellen. Beschaff dir bitte eine aktuelle Version von Chrome, Firefox oder Internet Explorer.');
       });
   }
 
