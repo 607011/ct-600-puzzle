@@ -103,7 +103,8 @@
     rng = new RNG(),
     puzzle, moves,
     N, M, nFields, nTurns,
-    cellW, cellH;
+    cellW, cellH,
+    mode_3d;
 
 
   function flip(x, y) {
@@ -198,7 +199,7 @@
     moves.push({ x: x, y: y });
     $('#moves').text(moves.length);
     $('#again').prop('disabled', false);
-    setTimeout(checkFinished, 250);
+    setTimeout(checkFinished, mode_3d ? 250 : 0);
     if ($('#solution').css('display') === 'block')
       solvePuzzle();
   }
@@ -384,8 +385,8 @@
           setTimeout(makeTurn, 1000);
         }
         else {
-          restoreButtons();
           alert('Gar nicht so schwer, oder? ;-)');
+          restoreButtons();
           newGame();
         }
       };
@@ -397,7 +398,55 @@
     $('#difficulties').prop('disabled', true);
   }
 
+
+  function generateStyles2D() {
+    var state, nextState, styles = '',
+      n = opts.n;
+    for (state = 0; state < n; ++state) {
+      nextState = (state + 1) % n;
+      styles += '\n' +
+          '.pos' + state + '{ z-index: ' + (state + 100) + '; }\n' +
+          '.state' + state + ' { background-image: url("img/cover' + state + '-582.jpg"); }\n' +
+          '@media screen and (max-width: 480px) { .state' + state + ' { background-image: url("img/cover' + state + '\
+-388.jpg"); } }\n';
+    }
+    return styles;
+  }
+
+
+  function generateStyles3D() {
+    var state, nextState, styles = '',
+      TinyExtraOffset = 1 / 256 / 256,
+      n = opts.n, a = cellW, deg1, deg2,
+      r = (n > 2) ? a / (2 * Math.tan(Math.PI / n)) : 0,
+      t1 = (n > 2) ? 'translateZ(' + (-r) + 'px) ' : '',
+      t2 = (n > 2) ? ' translateZ(' + (r + r * TinyExtraOffset).toFixed(16) + 'px)' : ' translateZ(' + TinyExtraOffset.toFixed(16) + 'px)';
+    for (state = 0; state < n; ++state) {
+      nextState = (state + 1) % n;
+      deg1 = state * 360 / n;
+      deg2 = (state + 1) * 360 / n;
+      styles += '\n' +
+          '.state' + state + ' { background-image: url("img/cover' + state + '-582.jpg"); }\n' +
+          '@media screen and (max-width: 480px) { .state' + state + ' { background-image: url("img/cover' + state + '\
+-388.jpg"); } }\n' +
+          '.pos' + state + ' {\n' +
+          PREFIXES.map(function (prefix) {
+            return prefix + 'animation: spin-to-pos' + nextState + ' ease 0.5s forwards;'
+          }).join('\n') +
+          '}\n' +
+          PREFIXES.map(function (prefix) {
+            return '@' + prefix + 'keyframes spin-to-pos' + state + ' {\n' +
+                '  from { ' + prefix + 'transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + '; }\n' +
+                '  to { ' + prefix + 'transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + '; }\n' +
+                '}';
+          }).join('\n');
+    }
+    return styles;
+  }
+
+
   function init() {
+    mode_3d = Modernizr.cssanimations && Modernizr.csstransforms3d;
     if (document.location.hash.length > 1) {
       document.location.hash.substring(1).split(';').forEach(function (arg) {
         var p = arg.split('=');
@@ -410,6 +459,7 @@
     });
     preloadImages()
       .done(function () {
+        var styles;
         $('#solve').on('click', playSolution);
         $('#hint').on('click', solvePuzzle);
         $('#again').on('click', restart).prop('disabled', true);
@@ -427,53 +477,10 @@
         $('#puzzle').after($('<table></table>').attr('id', 'solution'));
         $(window).on('resize', resize);
         resize();
-        if (Modernizr.cssanimations && Modernizr.csstransforms3d) {
-          (function generateStyles3D() {
-            var state, nextState, styles = '',
-              n = opts.n, a = cellW, deg1, deg2,
-              r = (n > 2) ? a / (2 * Math.tan(Math.PI / n)) : 0,
-              t1 = (n > 2) ? 'translateZ(' + (-r) + 'px) ' : '',
-              t2 = (n > 2) ? ' translateZ(' + r + 'px)' : ' translateZ(0.1px)';
-            for (state = 0; state < n; ++state) {
-              nextState = (state + 1) % n;
-              deg1 = state * 360 / n;
-              deg2 = (state + 1) * 360 / n;
-              styles += '\n' +
-                  '.state' + state + ' { background-image: url("img/cover' + state + '-582.jpg"); }\n' +
-                  '@media screen and (max-width: 480px) { .state' + state + ' { background-image: url("img/cover' + state + '\
--388.jpg"); } }\n' +
-                  '.pos' + state + ' {\n' +
-                  PREFIXES.map(function (prefix) {
-                    return prefix + 'animation: spin-to-pos' + nextState + ' ease 0.5s forwards;'
-                  }).join('\n') +
-                  '}\n' +
-                  PREFIXES.map(function (prefix) {
-                    return '@' + prefix + 'keyframes spin-to-pos' + state + ' {\n' +
-                        '  from { ' + prefix + 'transform: ' + t1 + 'rotateY(' + deg1 + 'deg)' + t2 + '; }\n' +
-                        '  to { ' + prefix + 'transform: ' + t1 + 'rotateY(' + deg2 + 'deg)' + t2 + '; }\n' +
-                        '}';
-                  }).join('\n');
-            }
-            $('head').append($('<style type="text/css"></style>').text(styles));
-          })();
-        }
-        else if (opts.n === 2) {
-          (function generateStyles2D() {
-            var state, nextState,
-              styles = '.pos0 { visibility: hidden; } .pos1 { visibility: visible; }',
-              n = opts.n;
-            for (state = 0; state < n; ++state) {
-              nextState = (state + 1) % n;
-              styles += '\n' +
-                  '.state' + state + ' { background-image: url("img/cover' + state + '-582.jpg"); }\n' +
-                  '@media screen and (max-width: 480px) { .state' + state + ' { background-image: url("img/cover' + state + '\
--388.jpg"); } }\n';
-            }
-            $('head').append($('<style type="text/css"></style>').text(styles));
-          })();
-        }
-        else
-          alert('Bitte verwenden Sie einen aktuellen Browser.');
+        styles = (mode_3d)
+          ? generateStyles3D()
+          : generateStyles2D();
+        $('head').append($('<style type="text/css"></style>').text(styles));
       });
   }
 
